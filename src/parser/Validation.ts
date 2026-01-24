@@ -1,6 +1,7 @@
 // ./src/parser/Validation.ts
 
-import type { AstNode, NodeType, FunctionNode } from "./Node";
+import type { AstNode, FunctionNode } from "./Node";
+import { NodeType } from "./Node";
 import { ParseError, ParseErrorCode } from "./ParseError";
 
 // A generic function that validates a single argument node.
