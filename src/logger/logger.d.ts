@@ -1,76 +1,76 @@
 // ./src/logger/logger.d.ts
 
-declare module "figlet/fonts/*" {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const value: any;
-  export default value;
+declare module 'figlet/fonts/*' {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const value: string;
+    export default value;
 }
 
 /**
  * @type AlignType
  * @description Type defining text alignment options.
  */
-type AlignType = "left" | "center" | "right";
+type AlignType = 'left' | 'center' | 'right';
 
 /**
  * @type StyleType
  * @description Type defining available text styles.
  */
 type StyleType =
-  | "bold"
-  | "reset"
-  | "dim"
-  | "italic"
-  | "underline"
-  | "blink"
-  | "inverse"
-  | "hidden"
-  | "strikethrough"
-  | "doubleunderline";
+    | 'bold'
+    | 'reset'
+    | 'dim'
+    | 'italic'
+    | 'underline'
+    | 'blink'
+    | 'inverse'
+    | 'hidden'
+    | 'strikethrough'
+    | 'doubleunderline';
 
 /**
  * @type ColorType
  * @description Type defining available text colors.
  */
 type ColorType =
-  | "green"
-  | "red"
-  | "yellow"
-  | "cyan"
-  | "black"
-  | "blue"
-  | "magenta"
-  | "white"
-  | "gray"
-  | "redBright"
-  | "greenBright"
-  | "yellowBright"
-  | "blueBright"
-  | "magentaBright"
-  | "cyanBright"
-  | "whiteBright";
+    | 'green'
+    | 'red'
+    | 'yellow'
+    | 'cyan'
+    | 'black'
+    | 'blue'
+    | 'magenta'
+    | 'white'
+    | 'gray'
+    | 'redBright'
+    | 'greenBright'
+    | 'yellowBright'
+    | 'blueBright'
+    | 'magentaBright'
+    | 'cyanBright'
+    | 'whiteBright';
 
 /**
  * @type BackgroundColorType
  * @description Type defining available background colors.
  */
 type BackgroundColorType =
-  | "bgGreen"
-  | "bgRed"
-  | "bgYellow"
-  | "bgCyan"
-  | "bgBlack"
-  | "bgBlue"
-  | "bgMagenta"
-  | "bgWhite"
-  | "bgGray"
-  | "bgRedBright"
-  | "bgGreenBright"
-  | "bgYellowBright"
-  | "bgBlueBright"
-  | "bgMagentaBright"
-  | "bgCyanBright"
-  | "bgWhiteBright";
+    | 'bgGreen'
+    | 'bgRed'
+    | 'bgYellow'
+    | 'bgCyan'
+    | 'bgBlack'
+    | 'bgBlue'
+    | 'bgMagenta'
+    | 'bgWhite'
+    | 'bgGray'
+    | 'bgRedBright'
+    | 'bgGreenBright'
+    | 'bgYellowBright'
+    | 'bgBlueBright'
+    | 'bgMagentaBright'
+    | 'bgCyanBright'
+    | 'bgWhiteBright';
 
 /**
  * @type InspectColor
@@ -92,24 +92,24 @@ type BoxParts = { [k in keyof typeof BoxPart]: string };
  * @property {(StyleType)[]} [styles] - Optional styles associated with the theme.
  */
 interface Theme {
-  /**
-   * Description placeholder
-   *
-   * @type {(InspectColor | InspectColor[])}
-   */
-  color: InspectColor | InspectColor[];
-  /**
-   * Description placeholder
-   *
-   * @type {LineType}
-   */
-  line: LineType;
-  /**
-   * Description placeholder
-   *
-   * @type {?StyleType[]}
-   */
-  styles?: StyleType[];
+    /**
+     * Description placeholder
+     *
+     * @type {(InspectColor | InspectColor[])}
+     */
+    color: InspectColor | InspectColor[];
+    /**
+     * Description placeholder
+     *
+     * @type {LineType}
+     */
+    line: LineType;
+    /**
+     * Description placeholder
+     *
+     * @type {?StyleType[]}
+     */
+    styles?: StyleType[];
 }
 
 /**
@@ -127,83 +127,83 @@ interface Theme {
  * @property {string} text - The text to display on the line.
  */
 interface PrintLineOptions {
-  // Alignment options
-  /**
-   * Description placeholder
-   *
-   * @type {?number}
-   */
-  width?: number;
-  /**
-   * Description placeholder
-   *
-   * @type {?boolean}
-   */
-  preNewLine?: boolean;
-  /**
-   * Description placeholder
-   *
-   * @type {?boolean}
-   */
-  postNewLine?: boolean;
+    // Alignment options
+    /**
+     * Description placeholder
+     *
+     * @type {?number}
+     */
+    width?: number;
+    /**
+     * Description placeholder
+     *
+     * @type {?boolean}
+     */
+    preNewLine?: boolean;
+    /**
+     * Description placeholder
+     *
+     * @type {?boolean}
+     */
+    postNewLine?: boolean;
 
-  // Line options
-  /**
-   * Description placeholder
-   *
-   * @type {?LineType}
-   */
-  lineType?: LineType;
-  /**
-   * Description placeholder
-   *
-   * @type {?keyof typeof Themes}
-   */
-  theme?: keyof typeof Themes;
-  /**
-   * Description placeholder
-   *
-   * @type {?(InspectColor | InspectColor[])}
-   */
-  color?: InspectColor | InspectColor[];
-  /**
-   * Description placeholder
-   *
-   * @type {?(InspectColor | InspectColor[])}
-   */
-  bgColor?: InspectColor | InspectColor[];
-  /**
-   * Description placeholder
-   *
-   * @type {?[InspectColor, InspectColor]}
-   */
-  gradient?: [InspectColor, InspectColor];
-  /**
-   * Description placeholder
-   *
-   * @type {?(StyleType | StyleType[])}
-   */
-  styles?: StyleType | StyleType[];
+    // Line options
+    /**
+     * Description placeholder
+     *
+     * @type {?LineType}
+     */
+    lineType?: LineType;
+    /**
+     * Description placeholder
+     *
+     * @type {?keyof typeof Themes}
+     */
+    theme?: keyof typeof Themes;
+    /**
+     * Description placeholder
+     *
+     * @type {?(InspectColor | InspectColor[])}
+     */
+    color?: InspectColor | InspectColor[];
+    /**
+     * Description placeholder
+     *
+     * @type {?(InspectColor | InspectColor[])}
+     */
+    bgColor?: InspectColor | InspectColor[];
+    /**
+     * Description placeholder
+     *
+     * @type {?[InspectColor, InspectColor]}
+     */
+    gradient?: [InspectColor, InspectColor];
+    /**
+     * Description placeholder
+     *
+     * @type {?(StyleType | StyleType[])}
+     */
+    styles?: StyleType | StyleType[];
 
-  // Text options
-  /**
-   * Description placeholder
-   *
-   * @type {?string}
-   */
-  text?: string;
-  /**
-   * Description placeholder
-   *
-   * @type {?AlignType}
-   */
-  textAlign?: AlignType;
-  /**
-   * Description placeholder
-   *
-   * @type {?(InspectColor | InspectColor[])}
-   */
-  textColor?: InspectColor | InspectColor[];
+    // Text options
+    /**
+     * Description placeholder
+     *
+     * @type {?string}
+     */
+    text?: string;
+    /**
+     * Description placeholder
+     *
+     * @type {?AlignType}
+     */
+    textAlign?: AlignType;
+    /**
+     * Description placeholder
+     *
+     * @type {?(InspectColor | InspectColor[])}
+     */
+    textColor?: InspectColor | InspectColor[];
 }
 
 /**
@@ -213,7 +213,7 @@ interface PrintLineOptions {
  * 'max'   - Width spans the maximum allowed width.
  * number  - Specific numeric width.
  */
-type BoxWidth = "tight" | "max" | number;
+type BoxWidth = 'tight' | 'max' | number;
 
 /**
  * @interface BoxTextOptions
@@ -231,75 +231,75 @@ type BoxWidth = "tight" | "max" | number;
  * @property {InspectColor | InspectColor[]} textBgColor - The text background color inside the box.
  */
 interface BoxTextOptions {
-  // Alignment options
-  /**
-   * Description placeholder
-   *
-   * @type {?BoxWidth}
-   */
-  width?: BoxWidth;
-  /**
-   * Description placeholder
-   *
-   * @type {?boolean}
-   */
-  preNewLine?: boolean;
-  /**
-   * Description placeholder
-   *
-   * @type {?boolean}
-   */
-  postNewLine?: boolean;
+    // Alignment options
+    /**
+     * Description placeholder
+     *
+     * @type {?BoxWidth}
+     */
+    width?: BoxWidth;
+    /**
+     * Description placeholder
+     *
+     * @type {?boolean}
+     */
+    preNewLine?: boolean;
+    /**
+     * Description placeholder
+     *
+     * @type {?boolean}
+     */
+    postNewLine?: boolean;
 
-  // Box options
-  /**
-   * Description placeholder
-   *
-   * @type {?BoxType}
-   */
-  boxType?: BoxType;
-  /**
-   * Description placeholder
-   *
-   * @type {?AlignType}
-   */
-  boxAlign?: AlignType;
-  /**
-   * Description placeholder
-   *
-   * @type {?keyof typeof Themes}
-   */
-  theme?: keyof typeof Themes;
-  /**
-   * Description placeholder
-   *
-   * @type {?(InspectColor | InspectColor[])}
-   */
-  color?: InspectColor | InspectColor[];
-  /**
-   * Description placeholder
-   *
-   * @type {?(InspectColor | InspectColor[])}
-   */
-  bgColor?: InspectColor | InspectColor[];
-  /**
-   * Description placeholder
-   *
-   * @type {?(StyleType | StyleType[])}
-   */
-  styles?: StyleType | StyleType[];
+    // Box options
+    /**
+     * Description placeholder
+     *
+     * @type {?BoxType}
+     */
+    boxType?: BoxType;
+    /**
+     * Description placeholder
+     *
+     * @type {?AlignType}
+     */
+    boxAlign?: AlignType;
+    /**
+     * Description placeholder
+     *
+     * @type {?keyof typeof Themes}
+     */
+    theme?: keyof typeof Themes;
+    /**
+     * Description placeholder
+     *
+     * @type {?(InspectColor | InspectColor[])}
+     */
+    color?: InspectColor | InspectColor[];
+    /**
+     * Description placeholder
+     *
+     * @type {?(InspectColor | InspectColor[])}
+     */
+    bgColor?: InspectColor | InspectColor[];
+    /**
+     * Description placeholder
+     *
+     * @type {?(StyleType | StyleType[])}
+     */
+    styles?: StyleType | StyleType[];
 
-  // Text options
-  /**
-   * Description placeholder
-   *
-   * @type {?(InspectColor | InspectColor[])}
-   */
-  textColor?: InspectColor | InspectColor[];
-  /**
-   * Description placeholder
-   *
-   * @type {?(InspectColor | InspectColor[])}
-   */
-  textBgColor?: InspectColor | InspectColor[];
+    // Text options
+    /**
+     * Description placeholder
+     *
+     * @type {?(InspectColor | InspectColor[])}
+     */
+    textColor?: InspectColor | InspectColor[];
+    /**
+     * Description placeholder
+     *
+     * @type {?(InspectColor | InspectColor[])}
+     */
+    textBgColor?: InspectColor | InspectColor[];
 }
