@@ -7,63 +7,53 @@
  * @enum {number}
  */
 export enum TokenType {
-  WHITESPACE = "WHITESPACE",
-  IDENTIFIER = "IDENTIFIER",
-  FUNCTION = "FUNCTION",
-  KEYWORD = "KEYWORD",
-  PROPERTY = "PROPERTY",
+    WHITESPACE = 'WHITESPACE',
+    IDENTIFIER = 'IDENTIFIER',
+    FUNCTION = 'FUNCTION',
+    KEYWORD = 'KEYWORD',
+    PROPERTY = 'PROPERTY',
 
-  NUMBER = "NUMBER",
-  PERCENTAGE = "PERCENTAGE",
-  DIMENSION = "DIMENSION",
+    NUMBER = 'NUMBER',
+    PERCENTAGE = 'PERCENTAGE',
+    DIMENSION = 'DIMENSION',
 
-  HEX_COLOR = "HEX_COLOR",
+    HEX_COLOR = 'HEX_COLOR',
 
-  LPAREN = "LPAREN",
-  RPAREN = "RPAREN",
-  COMMA = "COMMA",
-  SLASH = "SLASH",
+    LPAREN = 'LPAREN',
+    RPAREN = 'RPAREN',
+    COMMA = 'COMMA',
+    SLASH = 'SLASH',
 
-  ERROR = "ERROR",
-  EOF = "EOF",
+    ERROR = 'ERROR',
+    EOF = 'EOF',
 }
 
 /**
- * Description placeholder
+ * Description
  *
- * @export
- * @interface Token
- * @typedef {Token}
+ * @interface
+ * @name Span
+ * @kind interface
+ * @exports
+ */
+export interface Span {
+    start: number; // Absolute index in the source
+    end: number; // Absolute index end
+    line: number; // Line number (1-based)
+    column: number; // Column number (1-based)
+}
+
+/**
+ * Description
+ *
+ * @interface
+ * @name Token
+ * @kind interface
+ * @exports
  */
 export interface Token {
-  /**
-   * Description placeholder
-   *
-   * @type {string}
-   */
-  value: string;
-  /**
-   * Description placeholder
-   *
-   * @type {TokenType}
-   */
-  type: TokenType;
-  /**
-   * Description placeholder
-   *
-   * @type {number}
-   */
-  start: number;
-  /**
-   * Description placeholder
-   *
-   * @type {number}
-   */
-  end: number;
-  /**
-   * Description placeholder
-   *
-   * @type {?string}
-   */
-  message?: string;
+    type: string;
+    span: Span;
+    // We only compute 'value' if we actually need it (e.g. for identifiers/numbers)
+    value?: string;
 }

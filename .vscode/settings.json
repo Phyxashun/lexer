@@ -246,4 +246,5 @@
   "[editorconfig]": {
     "editor.defaultFormatter": "EditorConfig.EditorConfig",
   },
+  "typescript.tsdk": "node_modules/typescript/lib",
 }

@@ -11,6 +11,12 @@ export class LexerError extends Error {
     ) {
         super(message);
         this.name = 'LexerError';
+
+        // This line is crucial for ensuring `instanceof ParseError` works correctly
+        Object.setPrototypeOf(this, LexerError.prototype);
+
+        // This keeps the stack trace clean
+        Error.captureStackTrace(this, this.constructor);
     }
 
     public getDetailedMessage(): string {
