@@ -20,6 +20,7 @@ export default defineConfig([
 
         rules: {
             ...tseslint.configs.recommended.rules,
+            ...prettierConfig.rules,
             '@typescript-eslint/no-unused-vars': [
                 'error',
                 {
@@ -34,9 +35,9 @@ export default defineConfig([
             ],
             'no-console': 'warn',
             semi: ['error', 'always'],
-            quotes: ['error', 'double'],
+            'prefer-const': 'error',
+            quotes: ['error', 'single'],
             'prettier/prettier': 'error',
-            ...prettierConfig.rules,
         },
     },
 ]);
