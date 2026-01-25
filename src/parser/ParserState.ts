@@ -1,18 +1,16 @@
 // ./src/parser/ParserState.ts
 
-import { type TokenType } from "../lexer/Token";
+import { type TokenType } from '../lexer/Token';
 
-/** The states our parser can be in. */
 export enum ParserState {
-  // Initial and Final States
-  Initial = "Initial", // Waiting for any color token
-  Complete = "Complete", // Successfully parsed a complete color
-  Error = "Error", // A non-recoverable error occurred
+    Initial = 'Initial', // Waiting for any color token
+    Complete = 'Complete', // Successfully parsed a complete color
+    Error = 'Error', // A non-recoverable error occurred
 
-  // Function Parsing States
-  AwaitLeftParen = "AwaitLeftParen", // Just saw a FUNCTION token, expecting '('
-  AwaitArgument = "AwaitArgument", // Inside a function, expecting an argument or ')'
-  AwaitSeparator = "AwaitSeparator", // Just saw an argument, expecting a separator (',' or '/') or ')'
+    // Function Parsing States
+    AwaitLeftParen = 'AwaitLeftParen', // Just saw a FUNCTION token, expecting '('
+    AwaitArgument = 'AwaitArgument', // Inside a function, expecting an argument or ')'
+    AwaitSeparator = 'AwaitSeparator', // Just saw an argument, expecting a separator (',' or '/') or ')'
 }
 
 /**
@@ -26,18 +24,8 @@ export type Action = (parser: Parser, token: Token) => void;
  * It specifies the action to take and the next state to move to.
  */
 export interface Transition {
-  /**
-   * Description placeholder
-   *
-   * @type {Action}
-   */
-  action: Action;
-  /**
-   * Description placeholder
-   *
-   * @type {ParserState}
-   */
-  nextState: ParserState;
+    action: Action;
+    nextState: ParserState;
 }
 
 /**
@@ -45,5 +33,5 @@ export interface Transition {
  * It maps [CurrentState] -> [InputToken] -> { action, nextState }.
  */
 export type TransitionTable = Partial<
-  Record<ParserState, Partial<Record<TokenType, Transition>>>
+    Record<ParserState, Partial<Record<TokenType, Transition>>>
 >;
