@@ -1,9 +1,9 @@
 // ./src/lexer/Lexer.ts
 
-import type { Char } from '../char/Char';
 import { TokenType, type Token, type Span } from './Token';
 import { State, DFA, ACCEPT, foldIdentifierToken } from './State';
 import { LexerError } from './LexerError';
+import { Char } from '../char/Char';
 
 const typesToSkip = new Set([TokenType.ERROR]);
 
@@ -30,20 +30,24 @@ export class Lexer {
         this.tokenize();
     }
 
+    private isEOF(): boolean {
+        return this.pos >= this.chars.length;
+    }
+
     private reset(): void {
         this.buffer = '';
         this.start = this.pos;
         this.state = State.InitialState;
     }
 
-    private peek(): Char {
+    private peek(): string {
         return this.chars[this.pos];
     }
 
-    private advance(): Char {
+    private advance(): string {
         const char = this.peek();
-        if (!char.isEOF()) {
-            this.buffer += char.value;
+        if (!this.isEOF()) {
+            this.buffer += char;
             this.pos++;
         }
         return char;
@@ -112,7 +116,7 @@ export class Lexer {
         while (true) {
             const ch = this.peek();
 
-            if (ch.isEOF()) {
+            if (this.isEOF()) {
                 if (this.buffer.length > 0) {
                     const acceptType = ACCEPT[this.state];
                     if (acceptType !== undefined) {

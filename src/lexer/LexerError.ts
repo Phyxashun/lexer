@@ -1,6 +1,7 @@
 // src/lexer/LexerError.ts
 
 import { styleText } from 'node:util';
+import { formatSourceError } from '../utils/ErrorFormatter';
 import { Span } from './Span';
 
 export class LexerError extends Error {
@@ -17,6 +18,15 @@ export class LexerError extends Error {
 
         // This keeps the stack trace clean
         Error.captureStackTrace(this, this.constructor);
+    }
+
+    public override toString(): string {
+        return formatSourceError(
+            'Lexer Error',
+            this.message,
+            this.span,
+            this.source,
+        );
     }
 
     public getDetailedMessage(): string {

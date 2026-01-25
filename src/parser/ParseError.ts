@@ -1,5 +1,6 @@
 // src/parser/ParseError.ts
 
+import { formatSourceError } from '../utils/ErrorFormatter';
 import { type Token } from '../lexer/Token';
 import { type ParserState } from './ParserState';
 
@@ -56,6 +57,7 @@ export class ParseError extends Error {
         code: ParseErrorCode,
         state: ParserState,
         token?: Token,
+        public source: string,
     ) {
         // Call the parent constructor (Error)
         super(message);
@@ -73,6 +75,16 @@ export class ParseError extends Error {
 
         // This keeps the stack trace clean
         Error.captureStackTrace(this, this.constructor);
+    }
+
+    public override toString(): string {
+        const title = `Parse Error [${this.stateName}]`;
+        return formatSourceError(
+            title,
+            this.message,
+            this.token.span,
+            this.source,
+        );
     }
 
     /**

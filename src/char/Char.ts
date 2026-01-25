@@ -2,59 +2,8 @@
 
 import { inspect, type InspectOptions } from 'node:util';
 
-/*
-interface InspectOptions {
-    // The length at which input values are split across multiple lines. Set to Infinity to format the input as a single line (in combination with compact set to true or any number >= 1).
-    breakLength?: number;
-
-    // If true, the output is styled with ANSI color codes. Colors are customizable.
-    colors?: boolean;
-
-    // Setting this to false causes each object key to be displayed on a new line. It will also add new lines to text that is longer than breakLength. If set to a number, the most n inner elements are united on a single line as long as all properties fit into breakLength. Short array elements are also grouped together. Note that no text will be reduced below 16 characters, no matter the breakLength size. For more information, see the example below.
-    compact?: number | boolean;
-
-    // If false, [util.inspect.custom](depth, opts, inspect) functions are not invoked.
-    customInspect?: boolean;
-
-    // Specifies the number of times to recurse while formatting object. This is useful for inspecting large objects. To recurse up to the maximum call stack size pass Infinity or null.
-    depth?: null | number;
-
-    // If set to true, getters are going to be inspected as well. If set to 'get' only getters without setter are going to be inspected. If set to 'set' only getters having a corresponding setter are going to be inspected. This might cause side effects depending on the getter function.
-    getters?: boolean | 'get' | 'set';
-
-    // Specifies the maximum number of Array, TypedArray, WeakMap, and WeakSet elements to include when formatting. Set to null or Infinity to show all elements. Set to 0 or negative to show no elements.
-    maxArrayLength?: null | number;
-
-    // Specifies the maximum number of characters to include when formatting. Set to null or Infinity to show all elements. Set to 0 or negative to show no characters.
-    maxStringLength?: null | number;
-
-    // If set to true, an underscore is used to separate every three digits in all bigints and numbers.
-    numericSeparator?: boolean;
-
-    // If true, object's non-enumerable symbols and properties are included in the formatted result. WeakMap and WeakSet entries are also included as well as user defined prototype properties (excluding method properties).
-    showHidden?: boolean;
-
-    // If true, Proxy inspection includes the target and handler objects.
-    showProxy?: boolean;
-
-    // If set to true or a function, all properties of an object, and Set and Map entries are sorted in the resulting string. If set to true the default sort is used. If set to a function, it is used as a compare function.
-    sorted?: boolean | ((a: string, b: string) => number);
-}//*/
-
-/**
- * Description placeholder
- *
- * @typedef {InspectStylizeFn}
- */
 type InspectStylizeFn = (text: string, styleType: string) => string;
 
-// Σ (Sigma) - the set of allowed characters
-/**
- * Description placeholder
- *
- * @export
- * @enum {number}
- */
 export enum CharType {
     // CharacterStream Control
     EOF = 'EOF',
@@ -121,21 +70,10 @@ export enum CharType {
     Unicode = 'Unicode',
 }
 
-/**
- * Description placeholder
- *
- * @typedef {CharSpecFn}
- */
 type CharSpecFn = (char: string) => boolean;
 
-/**
- * Description placeholder
- *
- * @type {*}
- */
 export const CharSpec = new Map<CharType, CharSpecFn>([
     [CharType.EOF, (char: string) => char === ''],
-    //[CharType.NewLine, (char: string) => /[\n\r]/.test(char)],
     [CharType.NewLine, (char: string) => /[\n\r\u2028\u2029]/u.test(char)],
     [CharType.Whitespace, (char: string) => /[ \t\f\v]/.test(char)],
     [CharType.Hash, (char: string) => char === '#'],
@@ -179,39 +117,11 @@ export const CharSpec = new Map<CharType, CharSpecFn>([
     [CharType.Unicode, (char: string) => /\P{ASCII}/v.test(char)],
 ]);
 
-/**
- * Constants
- */
 const TARGET_CHAR_DISPLAY_WIDTH = 8;
-/**
- * Description placeholder
- *
- * @type {-1}
- */
 const IS_UNDEFINED = -1;
-/**
- * Description placeholder
- *
- * @type {0}
- */
 const IS_NULL = 0;
-/**
- * Description placeholder
- *
- * @type {1}
- */
 const SINGLE_WIDTH = 1;
-/**
- * Description placeholder
- *
- * @type {2}
- */
 const DOUBLE_WIDTH = 2;
-/**
- * Description placeholder
- *
- * @type {Record<string, string>}
- */
 const COMMON_ESCAPES: Record<string, string> = {
     '\n': '\\n',
     '\r': '\\r',
@@ -222,11 +132,6 @@ const COMMON_ESCAPES: Record<string, string> = {
     '\0': '\\0',
     '\\': '\\\\',
 } as const;
-/**
- * Description placeholder
- *
- * @type {Record<string, number>}
- */
 const NUMERAL_MAP: Record<string, number> = {
     Ⅰ: 1,
     Ⅱ: 2,
@@ -257,22 +162,7 @@ const NUMERAL_MAP: Record<string, number> = {
     '⑩': 10,
 } as const;
 
-/**
- * Description placeholder
- *
- * @export
- * @class Position
- * @typedef {Position}
- */
 export class Position {
-    /**
-     * Creates an instance of Position.
-     *
-     * @constructor
-     * @param {number} [index=IS_UNDEFINED]
-     * @param {number} [line=IS_UNDEFINED]
-     * @param {number} [column=IS_UNDEFINED]
-     */
     constructor(
         public index: number = IS_UNDEFINED,
         public line: number = IS_UNDEFINED,
@@ -280,59 +170,12 @@ export class Position {
     ) {}
 }
 
-/**
- * Description placeholder
- *
- * @export
- * @class IChar
- * @typedef {IChar}
- */
 export class IChar {
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @type {CharType}
-     */
-    public type: CharType;
-    /**
-     * Description placeholder
-     *
-     * @protected
-     * @type {Uint32Array}
-     */
     protected _value: Uint32Array;
-    /**
-     * Description placeholder
-     *
-     * @protected
-     * @type {boolean}
-     */
     protected _isSubstring: boolean;
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @type {number}
-     */
     public maxWidth: number;
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @type {Position}
-     */
     public position: Position;
 
-    /**
-     * Creates an instance of IChar.
-     *
-     * @constructor
-     * @param {?CharType} [type]
-     * @param {?string} [value]
-     * @param {?boolean} [isSubstring]
-     * @param {?Position} [position]
-     */
     constructor(
         type?: CharType,
         value?: string,
@@ -347,44 +190,20 @@ export class IChar {
         this.position = position ?? new Position();
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @type {boolean}
-     */
     public get isSubstring(): boolean {
         return this._isSubstring && this.position.index !== IS_UNDEFINED;
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @type {boolean}
-     */
     public set isSubstring(value: boolean) {
         this._isSubstring = value;
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @type {string}
-     */
     public get value(): string {
         return Array.from(this._value)
             .map(codePoint => String.fromCodePoint(codePoint))
             .join('');
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @type {string}
-     */
     public set value(character: string) {
         const codePoints = Array.from(character).map(c => c.codePointAt(0));
         if (codePoints.some(cp => cp > 0x10ffff)) {
@@ -394,34 +213,9 @@ export class IChar {
     }
 }
 
-/**
- * Description placeholder
- *
- * @export
- * @class Char
- * @typedef {Char}
- * @extends {IChar}
- */
 export class Char extends IChar {
-    /**
-     * Description placeholder
-     *
-     * @private
-     * @readonly
-     * @type {string}
-     */
     private readonly raw: string;
 
-    /**
-     * Creates an instance of Char.
-     *
-     * @constructor
-     * @param {string} character
-     * @param {{
-     *             isSubstring?: boolean;
-     *             position?: Position;
-     *         }} [options={}]
-     */
     constructor(
         character: string,
         options: {
@@ -456,21 +250,10 @@ export class Char extends IChar {
         this.raw = validatedChar;
     }
 
-    /**
-     * @inheritdoc
-     *
-     * @public
-     * @returns {string}
-     */
     public override toString(): string {
         const value = Char.handleEscape(this.value);
-
-        // If handleEscape already returned an escaped representation (like '\\n'),
-        // we can return it directly. Otherwise, check for other control characters.
         if (value !== this.value) return value;
 
-        // Check for other unprintable or special Unicode characters
-        // Using \p{Control} and \p{Unassigned} to identify characters that should be escaped
         if (/\p{Control}/u.test(value)) {
             return Array.from(value)
                 .map(cp => {
@@ -480,37 +263,15 @@ export class Char extends IChar {
                 })
                 .join('');
         }
-
-        // Return the character as-is if it's a standard printable character
         return value;
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @returns {string}
-     */
     public getRawString(): string {
         return this.raw;
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @readonly
-     * @type {"Char"}
-     */
     public readonly [Symbol.toStringTag] = 'Char';
 
-    /**
-     * Description placeholder
-     *
-     * @param {number} depth
-     * @param {InspectOptions} options
-     * @returns {string}
-     */
     [inspect.custom] = (depth: number, options: InspectOptions): string => {
         // Get the private stylize function from node:util.inspect
         const stylize: InspectStylizeFn = options.stylize as InspectStylizeFn;
@@ -572,166 +333,70 @@ export class Char extends IChar {
         return `${CLASSNAME}${IDX}: ${CHAR}: { ${TYPE} }`;
     };
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @returns {boolean}
-     */
     public isEOF(): boolean {
         return this.type === CharType.EOF;
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @returns {boolean}
-     */
     public isHexValue(): boolean {
         // The 'u' flag enables Unicode support, required for \p{} property escapes.
         return /^\p{ASCII_Hex_Digit}$/u.test(this.getRawString());
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @returns {boolean}
-     */
     public isNumber(): boolean {
         return this.type === CharType.Number;
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @returns {boolean}
-     */
     public isLetter(): boolean {
         return this.type === CharType.Letter;
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @returns {boolean}
-     */
     public isLetterOrNumber(): boolean {
         // Matches any letter or number in any script
         return this.isLetter() || this.isNumber();
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @returns {boolean}
-     */
     public isNewLine(): boolean {
         return this.type === CharType.NewLine;
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @returns {boolean}
-     */
     public isWhitespace(): boolean {
         return this.type === CharType.Whitespace;
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @returns {boolean}
-     */
     public isEmoji(): boolean {
         return this.type === CharType.Emoji;
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @returns {boolean}
-     */
     public isCurrency(): boolean {
         return this.type === CharType.Currency;
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @returns {boolean}
-     */
     public isPunctuation(): boolean {
         return this.type === CharType.Punctuation;
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @returns {boolean}
-     */
     public isSymbol(): boolean {
         return this.type === CharType.Symbol;
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @returns {boolean}
-     */
     public isUnicode(): boolean {
         return this.type === CharType.Unicode;
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @returns {boolean}
-     */
     public isUndefined(): boolean {
         return this.type === CharType.Undefined;
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @returns {boolean}
-     */
     public isUpperCase(): boolean {
         // \p{Lu} = Unicode Uppercase Letter
         return /\p{Lu}/u.test(this.value);
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @returns {boolean}
-     */
     public isLowerCase(): boolean {
         // \p{Ll} = Unicode Lowercase Letter
         return /\p{Ll}/u.test(this.value);
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @returns {number}
-     */
     public getNumericValue(): number {
         const val = this.value;
 
@@ -753,24 +418,10 @@ export class Char extends IChar {
         return IS_UNDEFINED;
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @returns {Uint32Array}
-     */
     public getValue(): Uint32Array {
         return this._value;
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @static
-     * @param {string} str
-     * @returns {Char[]}
-     */
     public static fromString(str: string): Char[] {
         const chars: Char[] = [];
         let maxWidth = 0;
@@ -804,15 +455,6 @@ export class Char extends IChar {
         return chars;
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @static
-     * @param {string} text
-     * @param {number} targetIndex
-     * @returns {Position}
-     */
     public static calculatePosition(
         text: string,
         targetIndex: number,
@@ -838,14 +480,6 @@ export class Char extends IChar {
         return new Position(targetIndex, line, column);
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @static
-     * @param {string} str
-     * @returns {number}
-     */
     public static calculateVisualWidth(str: string): number {
         const escaped = Char.handleEscape(str);
         if (escaped !== str) return escaped.length;
@@ -862,14 +496,6 @@ export class Char extends IChar {
         return SINGLE_WIDTH;
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @static
-     * @param {string} str
-     * @returns {boolean}
-     */
     public static isMultiCharacter(str: string): boolean {
         return (
             str === '\\n' ||
@@ -880,33 +506,17 @@ export class Char extends IChar {
         );
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @static
-     * @param {number} code
-     * @returns {boolean}
-     */
     public static isZeroWidth(code: number): boolean {
         return (
-            code <= 0x1f || // C0 controls
-            (code >= 0x7f && code <= 0x9f) || // C1 controls
-            (code >= 0x300 && code <= 0x36f) || // Combining Diacritical Marks
-            (code >= 0x200b && code <= 0x200f) || // Zero-width spaces
-            (code >= 0xfe00 && code <= 0xfe0f) || // Variation Selectors block
+            code <= 0x1f ||
+            (code >= 0x7f && code <= 0x9f) ||
+            (code >= 0x300 && code <= 0x36f) ||
+            (code >= 0x200b && code <= 0x200f) ||
+            (code >= 0xfe00 && code <= 0xfe0f) ||
             (code >= 0xfeff && code <= 0xfeff)
-        ); // Zero-width no-break space
+        );
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @static
-     * @param {number} code
-     * @returns {boolean}
-     */
     public static isDoubleWidth(code: number): boolean {
         return (
             (code >= 0x1100 && code <= 0x115f) || // Hangul Jamo
@@ -923,12 +533,6 @@ export class Char extends IChar {
         );
     }
 
-    /**
-     * Description placeholder
-     *
-     * @param {string} char
-     * @returns {CharType}
-     */
     public static getType = (char: string): CharType => {
         if (char === undefined) return CharType.Undefined;
         if (char === null) return CharType.Error;
@@ -938,27 +542,11 @@ export class Char extends IChar {
         return CharType.Undefined;
     };
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @static
-     * @param {string} value
-     * @returns {string}
-     */
     public static handleEscape(value: string): string {
         if (COMMON_ESCAPES[value]) return COMMON_ESCAPES[value];
         return value;
     }
 
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @static
-     * @param {string} value
-     * @returns {number}
-     */
     public static handleNonDigit(value: string): number {
         if (NUMERAL_MAP[value] !== undefined) {
             return NUMERAL_MAP[value];
