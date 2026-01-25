@@ -135,10 +135,9 @@ export function validate(node: CstNode, rawSource: string): void {
         const validator = spec.args[i];
         if (!validator(arg)) {
             throw new ParseError(
-                `Argument ${i + 1} of function '${node.name}' is invalid. Expected ${validator.name} but got ${arg.type}.`,
+                `Argument ${i + 1} of function '${node.name}' is invalid...`,
                 ParseErrorCode.INVALID_ARGUMENT,
                 'Validation',
-                // Point the caret DIRECTLY at the offending argument!
                 { span: arg.span },
                 rawSource,
             );

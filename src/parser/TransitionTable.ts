@@ -24,7 +24,7 @@ export const CSSColorParserTable: TransitionTable = {
             nextState: ParserState.Error,
             action: (parser, token) => {
                 throw new ParseError(
-                    `Unknown color keyword '${token.value}'.`,
+                    `Color keyword '${token.value}' is not supported yet.`,
                     ParseErrorCode.UNEXPECTED_TOKEN,
                     'Initial',
                     token,

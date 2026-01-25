@@ -14,11 +14,30 @@ import { ParseError, ParseErrorCode } from './ParseError';
  * @param {Parser} parser
  * @returns {CstNode}
  */
-const currentFunc = (parser: Parser): CstNode => {
+const currentFunc = (parser: Parser, token: Token): FunctionNode => {
     const node = parser.stack[parser.stack.length - 1];
-    if (node.type !== NodeType.Function)
-        throw new Error('Parser error: Expected a FunctionNode on the stack.');
-    return node;
+
+    if (!node) {
+        throw new ParseError(
+            `Found '${token.value}' outside of a function context.`,
+            ParseErrorCode.UNEXPECTED_TOKEN,
+            ParserState[parser.state],
+            token,
+            parser.rawSource,
+        );
+    }
+
+    if (node.type !== NodeType.Function) {
+        throw new ParseError(
+            `Internal Parser Error: Expected a FunctionNode on the stack but found ${node.type}.`,
+            ParseErrorCode.UNEXPECTED_TOKEN,
+            ParserState[parser.state],
+            token,
+            parser.rawSource,
+        );
+    }
+
+    return node as FunctionNode;
 };
 
 /**
@@ -76,9 +95,17 @@ export const startFunction: Action = (parser: Parser, token: Token) => {
  * @param {Parser} parser
  * @param {Token} _token
  */
-export const finishFunction: Action = (parser: Parser, _token: Token) => {
-    const finishedNode = parser.stack.pop();
-    if (!finishedNode) throw new Error('Stack was empty on finishFunction.');
+export const finishFunction: Action = (parser: Parser, token: Token) => {
+    const finishedNode = parser.stack.pop() as FunctionNode;
+    if (!finishedNode) throw new Error('Stack was empty.');
+
+    if (finishedNode.span) {
+        finishedNode.span = {
+            ...finishedNode.span,
+            length: token.span.end - finishedNode.span.start,
+        };
+    }
+
     if (parser.stack.length === 0) {
         parser.cst = finishedNode;
         parser.state = ParserState.Complete;
@@ -152,7 +179,7 @@ export const createAndPushArgument: Action = (parser: Parser, token: Token) => {
             );
     }
 
-    currentFunc(parser).children.push(node);
+    currentFunc(parser, token).children.push(node);
 };
 
 /**
@@ -167,7 +194,7 @@ export const createAndPushOperator: Action = (parser: Parser, token: Token) => {
         value: token.value as ',' | '/',
         span: token.span,
     };
-    currentFunc(parser).children.push(node);
+    currentFunc(parser, token).children.push(node);
 };
 
 /**

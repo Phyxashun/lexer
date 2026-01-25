@@ -54,9 +54,9 @@ export class Parser {
 
             if (!transition) {
                 throw new ParseError(
-                    `Unexpected token '${token.value}'`,
+                    `Unknown or unexpected identifier '${token.value}'.`,
                     ParseErrorCode.UNEXPECTED_TOKEN,
-                    this.state,
+                    ParserState[this.state],
                     token,
                     this.rawSource,
                 );
@@ -83,9 +83,9 @@ export class Parser {
                 );
             } else {
                 throw new ParseError(
-                    'Parsing did not produce a result (Unexpected EOF).',
+                    'Parsing finished without finding a valid CSS color.',
                     ParseErrorCode.UNEXPECTED_EOF,
-                    this.state,
+                    ParserState[this.state],
                     errorToken,
                     this.rawSource,
                 );
