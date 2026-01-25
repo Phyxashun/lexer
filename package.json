@@ -13,7 +13,8 @@
         "lint": "bunx eslint .",
         "lint-fix": "bunx eslint . --fix",
         "prettier": "bunx prettier --write .",
-        "consolidate": "bun run ./src/consolidate/consolidate.ts"
+        "consolidate": "bun run ./src/consolidate/consolidate.ts",
+        "sync": "git add . && git commit -m \"Sync Changes\" && git push -u origin main"
     },
     "peerDependencies": {
         "typescript": "^5.9.3"
