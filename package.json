@@ -1,7 +1,23 @@
 {
     "name": "lexer",
+    "version": "1.0.0",
+    "author": "Dusty Dew",
+    "license": "MIT",
+    "description": "",
     "module": "index.ts",
     "type": "module",
+    "scripts": {
+        "start": "bun run index.ts",
+        "test": "vitest",
+        "coverage": "vitest --coverage",
+        "lint": "bunx eslint .",
+        "lint-fix": "bunx eslint . --fix",
+        "prettier": "bunx prettier --write .",
+        "consolidate": "bun run ./src/consolidate/consolidate.ts"
+    },
+    "peerDependencies": {
+        "typescript": "^5.9.3"
+    },
     "devDependencies": {
         "@eslint/js": "^9.39.2",
         "@stylistic/eslint-plugin": "^5.7.1",
@@ -22,16 +38,5 @@
         "typedoc": "^0.28.16",
         "typescript-eslint": "^8.53.1",
         "vitest": "^4.0.18"
-    },
-    "peerDependencies": {
-        "typescript": "^5.9.3"
-    },
-    "scripts": {
-        "start": "bun run ./index.ts",
-        "test": "vitest",
-        "coverage": "vitest --coverage",
-        "lint": "bunx eslint .",
-        "format": "bunx prettier --write .",
-        "consolidate": "bun run ./src/consolidate/consolidate.ts"
     }
 }
