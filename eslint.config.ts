@@ -1,26 +1,19 @@
 import { defineConfig } from 'eslint/config';
-import tseslint from '@typescript-eslint/eslint-plugin';
-import tsparser from '@typescript-eslint/parser';
-import prettierPlugin from 'eslint-plugin-prettier';
-import prettierConfig from 'eslint-config-prettier';
+import tseslint from 'typescript-eslint';
+import stylistic from '@stylistic/eslint-plugin';
+import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 
 export default defineConfig([
+    // TypeScript & ESLint Recommended
+    ...tseslint.configs.recommended,
+
+    // Project-Specific configuration
     {
-        files: ['**/*.ts'],
-
-        languageOptions: {
-            parser: tsparser,
-            sourceType: 'module',
-        },
-
+        files: ['index.ts', 'src/**/*.ts'],
         plugins: {
-            '@typescript-eslint': tseslint,
-            prettier: prettierPlugin,
+            '@stylistic': stylistic,
         },
-
         rules: {
-            ...tseslint.configs.recommended.rules,
-            ...prettierConfig.rules,
             '@typescript-eslint/no-unused-vars': [
                 'error',
                 {
@@ -33,11 +26,13 @@ export default defineConfig([
                     ignoreRestSiblings: true,
                 },
             ],
-            'no-console': 'warn',
-            semi: ['error', 'always'],
+            '@stylistic/indent': ['error', 4],
+            '@stylistic/semi': ['error', 'always'],
+            '@stylistic/quotes': ['error', 'single'],
             'prefer-const': 'error',
-            quotes: ['error', 'single'],
-            'prettier/prettier': 'error',
         },
     },
+
+    // Prettier (Must be last to override stylistic conflicts)
+    eslintPluginPrettierRecommended,
 ]);

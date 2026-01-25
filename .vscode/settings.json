@@ -67,7 +67,6 @@
     "editor.defaultFoldingRangeProvider": "EditorConfig.EditorConfig",
     "editor.foldingStrategy": "indentation",
     "editor.detectIndentation": false,
-    "betterRegions.enableForAllFiles": true,
     //
     // ─── 💻 LANGUAGE SPECIFIC SETTINGS ──────────────────────────────────────────────
     //
@@ -206,6 +205,10 @@
     "eslint.codeAction.disableRuleComment": {
         "enable": true,
         "location": "sameLine",
+    },
+    "eslint.useFlatConfig": true,
+    "eslint.options": {
+        "overrideConfigFile": "eslint.config.ts"
     },
     //------ EmogiSense ------//
     "emojisense.languages": {
