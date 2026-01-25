@@ -1,13 +1,19 @@
-import { defineConfig } from 'eslint/config';
+import { defineConfig, globalIgnores } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 import stylistic from '@stylistic/eslint-plugin';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 
 export default defineConfig([
-    // TypeScript & ESLint Recommended
+    globalIgnores([
+        '.vscode/',
+        'ALL/',
+        'node_modules/',
+        'dist/',
+        'build/**/*',
+        'temp.js',
+        '**/*.config.js',
+    ]),
     ...tseslint.configs.recommended,
-
-    // Project-Specific configuration
     {
         files: ['index.ts', 'src/**/*.ts'],
         plugins: {
@@ -32,7 +38,5 @@ export default defineConfig([
             'prefer-const': 'error',
         },
     },
-
-    // Prettier (Must be last to override stylistic conflicts)
     eslintPluginPrettierRecommended,
 ]);

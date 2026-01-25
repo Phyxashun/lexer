@@ -1,9 +1,7 @@
 {
     "compilerOptions": {
         // Environment setup & latest features
-        "lib": [
-            "ESNext"
-        ],
+        "lib": ["ESNext"],
         "target": "ESNext",
         "module": "Preserve",
         "moduleDetection": "force",
@@ -35,7 +33,5 @@
         "./src/logger/logger.d.ts",
         "index.ts"
     ],
-    "exclude": [
-        "./ALL/**/*.*"
-    ]
+    "exclude": ["./ALL/**/*.*"]
 }
