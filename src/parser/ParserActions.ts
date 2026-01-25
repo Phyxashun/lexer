@@ -32,7 +32,7 @@ export const createIdentifier: Action = (parser: Parser, token: Token) => {
         type: NodeType.Identifier,
         name: token.value,
     };
-    parser.ast = node;
+    parser.cst = node;
 };
 
 /**
@@ -46,7 +46,7 @@ export const createHexColor: Action = (parser: Parser, token: Token) => {
         type: NodeType.HexColor,
         value: token.value.slice(1),
     };
-    parser.ast = node;
+    parser.cst = node;
 };
 
 /**
@@ -77,7 +77,7 @@ export const finishFunction: Action = (parser: Parser, _token: Token) => {
     const finishedNode = parser.stack.pop();
     if (!finishedNode) throw new Error('Stack was empty on finishFunction.');
     if (parser.stack.length === 0) {
-        parser.ast = finishedNode;
+        parser.cst = finishedNode;
         parser.state = ParserState.Complete;
     }
 };

@@ -19,60 +19,69 @@ export class Parser {
 
     constructor(tokens: Token[], rawSource?: string) {
         this.tokens = tokens;
-        this.rawSource = rawSource ?? '';
+        this.rawSource = rawSource;
         this.table = CSSColorParserTable;
     }
 
-    private peek(): Token | null {
-        return this.tokens[this.pos] ?? null;
+    private isEOF(): boolean {
+        return (
+            this.pos >= this.tokens.length ||
+            this.tokens[this.pos]?.type === TokenType.EOF
+        );
+    }
+
+    private peek(): Token {
+        if (this.isEOF()) {
+            return this.tokens[this.tokens.length - 1];
+        }
+        return this.tokens[this.pos];
     }
 
     private consume(): Token {
-        return this.tokens[this.pos++];
+        const token = this.peek();
+        if (token.type !== TokenType.EOF) {
+            this.pos++;
+        }
+        return token;
     }
 
     public parse(): CstNode {
-        while (true) {
+        while (!this.isEOF()) {
             const token = this.peek();
+            if (!token || token.type === TokenType.EOF) break;
 
-            while (this.pos < this.tokens.length) {
-                if (!token || token.type === TokenType.EOF) break;
+            const transition = this.table[this.state]?.[token.type];
 
-                const transition = this.table[this.state]?.[token.type];
-
-                if (!transition) {
-                    throw new ParseError(
-                        `Unexpected token '${token.value}'`,
-                        ParseErrorCode.UNEXPECTED_TOKEN,
-                        this.state,
-                        token,
-                        this.rawSource,
-                    );
-                }
-                this.consume();
-                transition.action(this, token);
-                this.state = transition.nextState;
-
-                if (this.state === ParserState.Complete) break;
+            if (!transition) {
+                throw new ParseError(
+                    `Unexpected token '${token.value}'`,
+                    ParseErrorCode.UNEXPECTED_TOKEN,
+                    this.state,
+                    token,
+                    this.rawSource,
+                );
             }
+            this.consume();
+            transition.action(this, token);
+            this.state = transition.nextState;
 
-            if (this.cst === null) {
-                const errorToken =
-                    this.tokens[this.pos] ||
-                    this.tokens[this.tokens.length - 1];
+            if (this.state === ParserState.Complete) break;
+        }
 
-                if (this.stack.length > 0) {
-                    const openFunc: FunctionNode = this
-                        .stack[0] as FunctionNode;
-                    throw new ParseError(
-                        `Function '${openFunc.name}' was not closed with a ')'`,
-                        ParseErrorCode.UNCLOSED_FUNCTION,
-                        this.state,
-                        errorToken,
-                        this.rawSource,
-                    );
-                }
+        if (this.cst === null) {
+            const errorToken =
+                this.tokens[this.pos] ?? this.tokens[this.tokens.length - 1];
 
+            if (this.stack.length > 0) {
+                const openFunc: FunctionNode = this.stack[0] as FunctionNode;
+                throw new ParseError(
+                    `Function '${openFunc.name}' was not closed with a ')'`,
+                    ParseErrorCode.UNCLOSED_FUNCTION,
+                    this.state,
+                    errorToken,
+                    this.rawSource,
+                );
+            } else {
                 throw new ParseError(
                     'Parsing did not produce a result (Unexpected EOF).',
                     ParseErrorCode.UNEXPECTED_EOF,
@@ -81,9 +90,8 @@ export class Parser {
                     this.rawSource,
                 );
             }
-            validate(this.cst);
-            break;
         }
+        validate(this.cst, this.rawSource);
         return this.cst;
     }
 }

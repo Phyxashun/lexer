@@ -1,12 +1,8 @@
-// src/parser/ParseError.ts
+// ./src/parser/ParseError.ts
 
 import { formatSourceError } from '../utils/ErrorFormatter';
 import { type Token } from '../lexer/Token';
-import { type ParserState } from './ParserState';
 
-/**
- * A set of specific, categorized error codes for our parser.
- */
 export enum ParseErrorCode {
     UNEXPECTED_TOKEN = 'UNEXPECTED_TOKEN',
     UNEXPECTED_EOF = 'UNEXPECTED_EOF',
@@ -14,70 +10,27 @@ export enum ParseErrorCode {
     INVALID_ARGUMENT = 'INVALID_ARGUMENT',
 }
 
-/**
- * A custom error class that provides detailed context about a parsing failure.
- */
 export class ParseError extends Error {
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @readonly
-     * @type {ParseErrorCode}
-     */
-    public readonly code: ParseErrorCode;
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @readonly
-     * @type {?Token}
-     */
-    public readonly token?: Token;
-    /**
-     * Description placeholder
-     *
-     * @public
-     * @readonly
-     * @type {ParserState}
-     */
-    public readonly state: ParserState;
-
-    /**
-     * Creates an instance of ParseError.
-     *
-     * @constructor
-     * @param {string} message
-     * @param {ParseErrorCode} code
-     * @param {ParserState} state
-     * @param {?Token} [token]
-     */
     constructor(
-        message: string,
-        code: ParseErrorCode,
-        state: ParserState,
-        token?: Token,
+        public override message: string,
+        public code: ParseErrorCode,
+        public stateName: string,
+        public token: Token,
         public source: string,
     ) {
-        // Call the parent constructor (Error)
         super(message);
-
-        // Set the error name to our custom class name
         this.name = 'ParseError';
 
-        // Assign our custom properties
-        this.code = code;
-        this.token = token;
-        this.state = state;
-
-        // This line is crucial for ensuring `instanceof ParseError` works correctly
+        // In TypeScript, 'public' in the constructor arguments automatically
+        // assigns the properties. We just need to fix the prototype.
         Object.setPrototypeOf(this, ParseError.prototype);
-
-        // This keeps the stack trace clean
-        Error.captureStackTrace(this, this.constructor);
     }
 
     public override toString(): string {
+        if (!this.token?.span) {
+            return `[${this.stateName}] ${this.message}`;
+        }
+
         const title = `Parse Error [${this.stateName}]`;
         return formatSourceError(
             title,
@@ -87,14 +40,11 @@ export class ParseError extends Error {
         );
     }
 
-    /**
-     * A helper method to generate a more detailed error string.
-     */
     public getDetailedMessage(): string {
-        let details = `${this.name} (${this.code}) in state '${this.state}': ${this.message}`;
-        if (this.token) {
+        let details = `${this.name} (${this.code}) in state '${this.stateName}': ${this.message}`;
+        if (this.token && this.token.span) {
             details += `\n  - Offending Token: '${this.token.value}' (Type: ${this.token.type})`;
-            details += `\n  - Position: Start ${this.token.start.toFixed()}, End ${this.token.end.toFixed()}`;
+            details += `\n  - Position: Start ${this.token.span.start}, End ${this.token.span.end}`;
         }
         return details;
     }

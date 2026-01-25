@@ -51,7 +51,7 @@ export const validationTable: Record<string, FunctionSpec> = {
  * The main validation function. It takes a completed CST node and checks it for semantic correctness.
  * It throws a ParseError if validation fails.
  */
-export function validate(node: CstNode): void {
+export function validate(node: CstNode, _rawSource: string): void {
     if (node.type !== NodeType.Function) {
         // Hex colors and identifiers are considered valid by default if they were parsed.
         return;
