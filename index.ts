@@ -8,7 +8,7 @@ import { Parser } from './src/parser/Parser';
 import { ParseError } from './src/parser/ParseError';
 import { LexerError } from './src/lexer/LexerError';
 
-const tests: string[] = [
+export const tests: string[] = [
     'red',
     '#ff00aa',
     '#f0c',
@@ -21,7 +21,28 @@ const tests: string[] = [
     '#badcolor', // Invalid hex length
 ];
 
-const test = () => {
+export const logChars = (chars: Char[]): void => {
+    console.log('Chars:');
+    for (const ch of chars) {
+        console.log(ch);
+    }
+};
+
+export const logTokens = (tokens: Token[]): void => {
+    console.log('Tokens:');
+    const filtered = tokens.filter(t => t.type !== 'EOF');
+    const formatted = inspect(filtered, inspectOptions);
+    console.log(formatted);
+};
+
+export const logCST = (cst: ASTNode): void => {
+    console.log('Concrete Syntax Tree (CST):');
+    const options = { ...inspectOptions, breakLength: 80 };
+    const formatted = inspect(cst, options);
+    console.log(formatted);
+};
+
+export const test = () => {
     console.log(`\n--- PARSER TESTING ---\n`);
 
     tests.forEach(str => {
@@ -29,31 +50,22 @@ const test = () => {
             console.log(`\n--- Testing Input: "${str}" ---`);
 
             const chars = Char.fromString(str);
+            // Optional: Output the Char[] to the console
+            //logChars(chars);
 
-            const lexer = new Lexer(chars, str);
-            const tokens: Token[] = lexer.tokens;
-
+            const tokens: Token[] = new Lexer(chars, str).tokens;
             // Optional: Output the tokens to the console
-            console.log('Tokens:');
-            const filtered = tokens.filter(t => t.type !== 'EOF');
-            const formatted = inspect(filtered, inspectOptions);
-            console.log(formatted);
+            //logTokens(tokens);
 
-            // Parse the token array into a concrete systax tree (CST)
-            const parser = new Parser(tokens, str);
-            const cst = parser.parse();
-
-            // Optional: Output the tokens to the console
-            console.log('Concrete Syntax Tree (CST):');
-            const cstOptions = { ...inspectOptions, breakLength: 80 };
-            const cstFormatted = inspect(cst, cstOptions);
-            console.log(cstFormatted);
+            const cst = new Parser(tokens, str).parse();
+            // Optional: Output the CST to the console
+            logCST(cst);
         } catch (e) {
             console.error('--- PARSE FAILED ---');
             if (e instanceof LexerError || e instanceof ParseError) {
                 console.error(e.toString());
             } else {
-                //console.error('An unknown error occurred:', e);
+                console.error('An unknown error occurred:', e);
             }
         }
     });

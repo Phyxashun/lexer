@@ -22,7 +22,7 @@ export function formatSourceError(
 
     return [
         '',
-        `${styleText('bgRed', styleText('white', ` ${title} `))} ${message}`,
+        `${styleText('bgRed', styleText('white', ` ${title} `))}\n${message}`,
         `${margin}${lineContent}`,
         `${spacer}${indent}${caret}`,
         '',
