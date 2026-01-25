@@ -19,6 +19,7 @@ export enum State {
     Number = 'Number',
     Dot = 'Dot',
     Fraction = 'Fraction',
+    Slash = 'Slash',
 
     // Unit DFA
     Dimension = 'Dimension',
@@ -70,8 +71,6 @@ export const DFA: TransitionTable = {
         [CharType.LParen]: State.SYNC,
         [CharType.RParen]: State.SYNC,
         [CharType.Comma]: State.SYNC,
-
-        // Note: Might want a dedicated state for SLASH
         [CharType.Slash]: State.SLASH,
         [CharType.Whitespace]: State.WS,
         [CharType.NewLine]: State.WS,
@@ -171,6 +170,9 @@ export const ACCEPT: Partial<Record<State, TokenType>> = {
 
     // dimensions
     [State.Dimension]: TokenType.DIMENSION,
+
+    // slash
+    [State.Slash]: TokenType.SLASH,
 
     // hex
     [State.Hex3]: TokenType.HEX_COLOR,

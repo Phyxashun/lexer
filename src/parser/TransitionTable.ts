@@ -3,12 +3,15 @@
 // transitionTable.ts
 import { ParserState, type TransitionTable } from './ParserState';
 import { TokenType } from '../lexer/Token';
-import { ParseError, ParseErrorCode } from './ParseError';
 import * as actions from './ParserActions';
 
 export const CSSColorParserTable: TransitionTable = {
     // State: Initial
     [ParserState.Initial]: {
+        [TokenType.IDENTIFIER]: {
+            action: actions.createIdentifier,
+            nextState: ParserState.Complete,
+        },
         [TokenType.HEX_COLOR]: {
             action: actions.createHexColor,
             nextState: ParserState.Complete,
@@ -16,18 +19,6 @@ export const CSSColorParserTable: TransitionTable = {
         [TokenType.FUNCTION]: {
             action: actions.startFunction,
             nextState: ParserState.AwaitLeftParen,
-        },
-        [TokenType.IDENTIFIER]: {
-            nextState: ParserState.Error,
-            action: (parser, token) => {
-                throw new ParseError(
-                    `Color keyword '${token.value}' is not supported yet.`,
-                    ParseErrorCode.UNEXPECTED_TOKEN,
-                    'Initial',
-                    token,
-                    parser.rawSource,
-                );
-            },
         },
     },
 

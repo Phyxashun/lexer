@@ -51,11 +51,11 @@ export const test = () => {
 
             const chars = Char.fromString(str);
             // Optional: Output the Char[] to the console
-            //logChars(chars);
+            logChars(chars);
 
             const tokens: Token[] = new Lexer(chars, str).tokens;
             // Optional: Output the tokens to the console
-            //logTokens(tokens);
+            logTokens(tokens);
 
             const cst = new Parser(tokens, str).parse();
             // Optional: Output the CST to the console

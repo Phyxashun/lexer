@@ -53,6 +53,7 @@ export const createIdentifier: Action = (parser: Parser, token: Token) => {
         span: token.span,
     };
     parser.cst = node;
+    console.log('INSIDE PARSER ACTIONS, NODE:', node);
 };
 
 /**

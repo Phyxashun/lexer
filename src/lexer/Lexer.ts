@@ -5,7 +5,7 @@ import { State, DFA, ACCEPT, foldIdentifierToken } from './State';
 import { LexerError } from './LexerError';
 import { Char } from '../char/Char';
 
-const typesToSkip = new Set([TokenType.ERROR]);
+const typesToSkip = new Set([]);
 
 const charTokenMap: Record<string, TokenType> = {
     '(': TokenType.LPAREN,
