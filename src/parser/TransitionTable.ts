@@ -20,6 +20,18 @@ export const CSSColorParserTable: TransitionTable = {
             action: actions.startFunction,
             nextState: ParserState.AwaitLeftParen,
         },
+        [TokenType.IDENTIFIER]: {
+            nextState: ParserState.Error,
+            action: (parser, token) => {
+                throw new ParseError(
+                    `Unknown color keyword '${token.value}'.`,
+                    ParseErrorCode.UNEXPECTED_TOKEN,
+                    'Initial',
+                    token,
+                    parser.rawSource,
+                );
+            },
+        },
     },
 
     // State: AwaitLeftParen
@@ -75,7 +87,7 @@ export const CSSColorParserTable: TransitionTable = {
         // This ends the current function parsing
         [TokenType.RPAREN]: {
             action: actions.finishFunction,
-            nextState: ParserState.AwaitArgument,
+            nextState: ParserState.Complete,
         },
     },
 

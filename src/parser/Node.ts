@@ -1,5 +1,7 @@
 // ./src/parser/Node.ts
 
+import { Span } from '../lexer/Token';
+
 /**
  * Description placeholder
  *
@@ -34,34 +36,15 @@ export enum DimensionKind {
 
 /** The base for all nodes in our color AST. */
 export interface CstNode {
-    /**
-     * Description placeholder
-     *
-     * @type {NodeType}
-     */
     type: NodeType;
+    span?: Span;
 }
 
 /** Represents a function call, like `rgb(...)`. It contains other nodes as arguments. */
 export interface FunctionNode extends CstNode {
-    /**
-     * Description placeholder
-     *
-     * @type {NodeType.Function}
-     */
     type: NodeType.Function;
-    /**
-     * Description placeholder
-     *
-     * @type {string}
-     */
     name: string;
-    /**
-     * Description placeholder
-     *
-     * @type {CstNode[]}
-     */
-    arguments: CstNode[];
+    children: CstNode[];
 }
 
 // === Leaf Nodes (Terminals) ===

@@ -31,6 +31,7 @@ export const createIdentifier: Action = (parser: Parser, token: Token) => {
     const node: CstNode = {
         type: NodeType.Identifier,
         name: token.value,
+        span: token.span,
     };
     parser.cst = node;
 };
@@ -45,6 +46,7 @@ export const createHexColor: Action = (parser: Parser, token: Token) => {
     const node: CstNode = {
         type: NodeType.HexColor,
         value: token.value.slice(1),
+        span: token.span,
     };
     parser.cst = node;
 };
@@ -59,6 +61,7 @@ export const startFunction: Action = (parser: Parser, token: Token) => {
     const node: CstNode = {
         type: NodeType.Function,
         name: token.value.toLowerCase(),
+        span: token.span,
         children: [],
     };
     if (parser.stack.length > 0) {
@@ -96,12 +99,14 @@ export const createAndPushArgument: Action = (parser: Parser, token: Token) => {
             node = {
                 type: NodeType.Number,
                 value: token.value,
+                span: token.span,
             };
             break;
         case TokenType.PERCENTAGE:
             node = {
                 type: NodeType.Percentage,
                 value: token.value.replace(/%/g, ''),
+                span: token.span,
             };
             break;
         case TokenType.DIMENSION: {
@@ -111,6 +116,7 @@ export const createAndPushArgument: Action = (parser: Parser, token: Token) => {
                 type: NodeType.Dimension,
                 value: match ? match[1] : '',
                 unit: match ? match[2] : token.value,
+                span: token.span,
             };
             break;
         }
@@ -118,12 +124,14 @@ export const createAndPushArgument: Action = (parser: Parser, token: Token) => {
             node = {
                 type: NodeType.Identifier,
                 name: token.value,
+                span: token.span,
             };
             break;
         case TokenType.WHITESPACE:
             node = {
                 type: NodeType.WhiteSpace,
                 value: ' ',
+                span: token.span,
             };
             break;
         case TokenType.SLASH:
@@ -131,14 +139,16 @@ export const createAndPushArgument: Action = (parser: Parser, token: Token) => {
             node = {
                 type: NodeType.Operator,
                 value: token.value as ',' | '/',
+                span: token.span,
             };
             break;
         default:
             throw new ParseError(
                 `Cannot use token of type '${token.type}' as a function argument`,
                 ParseErrorCode.INVALID_ARGUMENT,
-                parser.state,
+                ParserState[parser.state],
                 token,
+                parser.rawSource,
             );
     }
 
@@ -155,8 +165,9 @@ export const createAndPushOperator: Action = (parser: Parser, token: Token) => {
     const node: CstNode = {
         type: NodeType.Operator,
         value: token.value as ',' | '/',
+        span: token.span,
     };
-    currentFunc(parser).arguments.push(node);
+    currentFunc(parser).children.push(node);
 };
 
 /**

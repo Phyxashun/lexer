@@ -21,16 +21,10 @@ export class ParseError extends Error {
         super(message);
         this.name = 'ParseError';
 
-        // In TypeScript, 'public' in the constructor arguments automatically
-        // assigns the properties. We just need to fix the prototype.
         Object.setPrototypeOf(this, ParseError.prototype);
     }
 
     public override toString(): string {
-        if (!this.token?.span) {
-            return `[${this.stateName}] ${this.message}`;
-        }
-
         const title = `Parse Error [${this.stateName}]`;
         return formatSourceError(
             title,
