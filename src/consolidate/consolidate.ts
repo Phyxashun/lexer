@@ -175,33 +175,51 @@ interface FinalSummaryOptions {
  ******************************************************************************************************/
 const JOB_DEFINITIONS: JobDefinition[] = [
     {
-        name: 'MAIN_FILES',
+        name: 'MAIN',
         description: 'Main Project TypeScript and JavaScript Files',
-        patterns: ['src/**/*.ts', 'src/**/*.js', 'index.ts', 'Consolidate.ts'],
+        patterns: ['src/*.{ts,js}', 'index.ts'],
+    },
+    {
+        name: 'CHAR',
+        description: 'Char Project TypeScript and JavaScript Files',
+        patterns: ['src/char/**/*.{ts,js}'],
+    },
+    {
+        name: 'LEXER',
+        description: 'Lexer Project TypeScript and JavaScript Files',
+        patterns: ['src/lexer/**/*.{ts,js}'],
+    },
+    {
+        name: 'PARSER',
+        description: 'Parser Project TypeScript and JavaScript Files',
+        patterns: ['src/parser/**/*.{ts,js}'],
+    },
+    {
+        name: 'UTILS',
+        description: 'Utility Project TypeScript and JavaScript Files',
+        patterns: [
+            'src/consolidate/**/*.{ts,js}',
+            'src/logger/**/*.{ts,js}',
+            'src/utils/**/*.{ts,js}',
+        ],
     },
     {
         name: 'CONFIG',
         description: 'Configuration Files and Markdown',
         patterns: [
             '.vscode/**/*',
+            '.editorconfig',
             '.gitignore',
-            '*.json',
-            '*.config.ts',
-            'git-push.sh',
+            'eslint.config.ts',
+            'package.json',
+            'prettier.config.ts',
+            'tsconfig.json',
         ],
     },
     {
-        name: 'NEW_TEST',
-        description: 'New Test Files',
+        name: 'TEST',
+        description: 'Test Project TypeScript and JavaScript Files',
         patterns: ['{test,tests}/**/*.test.ts'],
-    },
-    {
-        name: 'OLD_TEST',
-        description: 'Old Test Files',
-        patterns: [
-            '{test_old, tests_old}/**/*.ts',
-            '{test_old,test_old}/**/*.test.ts',
-        ],
     },
     {
         name: 'MARKDOWN',

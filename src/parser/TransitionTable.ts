@@ -3,15 +3,12 @@
 // transitionTable.ts
 import { ParserState, type TransitionTable } from './ParserState';
 import { TokenType } from '../lexer/Token';
+import { ParseError, ParseErrorCode } from './ParseError';
 import * as actions from './ParserActions';
 
 export const CSSColorParserTable: TransitionTable = {
     // State: Initial
     [ParserState.Initial]: {
-        [TokenType.IDENTIFIER]: {
-            action: actions.createIdentifier,
-            nextState: ParserState.Complete,
-        },
         [TokenType.HEX_COLOR]: {
             action: actions.createHexColor,
             nextState: ParserState.Complete,
