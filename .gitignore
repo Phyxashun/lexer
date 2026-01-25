@@ -1,22 +1,30 @@
-# dependencies (bun install)
-node_modules
+# Dependencies and IDEs
+node_modules/
+.vscode/
 
-# output
-out
-dist
+# Build Artifacts
+out/
+dist/
+build/
 *.tgz
+*.tsbuildinfo
 
-# code coverage
-coverage
+# Testing and Quality
+coverage/
 *.lcov
+.eslintcache
+.cache/
+cache/
 
-# logs
-logs
+# Logs
+logs/
 _.log
-report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
+*.log
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
-# dotenv environment variable files
+# Environment Files
 .env
+.env.*
 .env.development.local
 .env.test.local
 .env.production.local
@@ -27,11 +35,5 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .cache
 *.tsbuildinfo
 
-# IntelliJ based IDEs
-.idea
-
-# Finder (MacOS) folder config
-.DS_Store
-
-# File consolidation folder
-ALL
+# Project Specific
+ALL/
