@@ -45,7 +45,7 @@ export class Parser {
                         ParseErrorCode.UNEXPECTED_TOKEN,
                         this.state,
                         token,
-                        this.rawSource ?? '',
+                        this.rawSource,
                     );
                 }
                 this.consume();
@@ -56,6 +56,10 @@ export class Parser {
             }
 
             if (this.ast === null) {
+                const errorToken =
+                    this.tokens[this.pos] ||
+                    this.tokens[this.tokens.length - 1];
+
                 if (this.stack.length > 0) {
                     const openFunc: FunctionNode = this
                         .stack[0] as FunctionNode;
@@ -63,9 +67,8 @@ export class Parser {
                         `Function '${openFunc.name}' was not closed with a ')'`,
                         ParseErrorCode.UNCLOSED_FUNCTION,
                         this.state,
-                        this.tokens[this.pos] ||
-                            this.tokens[this.tokens.length - 1],
-                        this.rawSource ?? '',
+                        errorToken,
+                        this.rawSource,
                     );
                 }
 
@@ -73,9 +76,8 @@ export class Parser {
                     'Parsing did not produce a result (Unexpected EOF).',
                     ParseErrorCode.UNEXPECTED_EOF,
                     this.state,
-                    this.tokens[this.pos] ||
-                        this.tokens[this.tokens.length - 1],
-                    this.rawSource ?? '',
+                    errorToken,
+                    this.rawSource,
                 );
             }
             validate(this.ast);
