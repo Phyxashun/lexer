@@ -33,7 +33,7 @@ export enum DimensionKind {
 // === Base Nodes ===
 
 /** The base for all nodes in our color AST. */
-export interface AstNode {
+export interface CstNode {
     /**
      * Description placeholder
      *
@@ -43,7 +43,7 @@ export interface AstNode {
 }
 
 /** Represents a function call, like `rgb(...)`. It contains other nodes as arguments. */
-export interface FunctionNode extends AstNode {
+export interface FunctionNode extends CstNode {
     /**
      * Description placeholder
      *
@@ -59,15 +59,15 @@ export interface FunctionNode extends AstNode {
     /**
      * Description placeholder
      *
-     * @type {AstNode[]}
+     * @type {CstNode[]}
      */
-    arguments: AstNode[];
+    arguments: CstNode[];
 }
 
 // === Leaf Nodes (Terminals) ===
 
 /** Represents a named color keyword, like `red` or `transparent`. */
-export interface IdentifierNode extends AstNode {
+export interface IdentifierNode extends CstNode {
     /**
      * Description placeholder
      *
@@ -83,7 +83,7 @@ export interface IdentifierNode extends AstNode {
 }
 
 /** Represents a hex color value. The value stored is the raw hex string without the '#'. */
-export interface HexColorNode extends AstNode {
+export interface HexColorNode extends CstNode {
     /**
      * Description placeholder
      *
@@ -99,7 +99,7 @@ export interface HexColorNode extends AstNode {
 }
 
 /** Represents a plain number, with no unit. */
-export interface NumberNode extends AstNode {
+export interface NumberNode extends CstNode {
     /**
      * Description placeholder
      *
@@ -115,7 +115,7 @@ export interface NumberNode extends AstNode {
 }
 
 /** Represents a number with a '%' unit. */
-export interface PercentageNode extends AstNode {
+export interface PercentageNode extends CstNode {
     /**
      * Description placeholder
      *
@@ -131,7 +131,7 @@ export interface PercentageNode extends AstNode {
 }
 
 /** Represents a number with a unit, like `120deg` or `1.5rad`. */
-export interface DimensionNode extends AstNode {
+export interface DimensionNode extends CstNode {
     /**
      * Description placeholder
      *
@@ -153,7 +153,7 @@ export interface DimensionNode extends AstNode {
 }
 
 /** Represents a syntactic operator, like `,` or `/`. */
-export interface OperatorNode extends AstNode {
+export interface OperatorNode extends CstNode {
     /**
      * Description placeholder
      *
@@ -174,9 +174,9 @@ export interface OperatorNode extends AstNode {
  * @export
  * @interface WhiteSpaceNode
  * @typedef {WhiteSpaceNode}
- * @extends {AstNode}
+ * @extends {CstNode}
  */
-export interface WhiteSpaceNode extends AstNode {
+export interface WhiteSpaceNode extends CstNode {
     /**
      * Description placeholder
      *

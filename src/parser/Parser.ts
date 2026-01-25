@@ -4,17 +4,18 @@ import { TokenType, type Token } from '../lexer/Token';
 import { ParserState, type TransitionTable } from './ParserState';
 import { ParseError, ParseErrorCode } from './ParseError';
 import { CSSColorParserTable } from './TransitionTable';
-import type { AstNode, FunctionNode } from './Node';
+import type { CstNode, FunctionNode } from './Node';
 import { validate } from './Validation';
 
 export class Parser {
     private readonly tokens: Token[];
-    private readonly table: TransitionTable;
     private pos = 0;
     public readonly rawSource: string;
+
+    private readonly table: TransitionTable;
     public state: ParserState = ParserState.Initial;
-    public stack: AstNode[] = [];
-    public ast: AstNode | null = null;
+    public stack: CstNode[] = [];
+    public cst: CstNode | null = null;
 
     constructor(tokens: Token[], rawSource?: string) {
         this.tokens = tokens;
@@ -30,7 +31,7 @@ export class Parser {
         return this.tokens[this.pos++];
     }
 
-    public parse(): AstNode {
+    public parse(): CstNode {
         while (true) {
             const token = this.peek();
 
@@ -55,7 +56,7 @@ export class Parser {
                 if (this.state === ParserState.Complete) break;
             }
 
-            if (this.ast === null) {
+            if (this.cst === null) {
                 const errorToken =
                     this.tokens[this.pos] ||
                     this.tokens[this.tokens.length - 1];
@@ -80,9 +81,9 @@ export class Parser {
                     this.rawSource,
                 );
             }
-            validate(this.ast);
+            validate(this.cst);
             break;
         }
-        return this.ast;
+        return this.cst;
     }
 }

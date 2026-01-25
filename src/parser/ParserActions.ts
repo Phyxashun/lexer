@@ -4,7 +4,7 @@
 import { type Parser } from './Parser';
 import { TokenType, type Token } from '../lexer/Token';
 import { NodeType } from './Node';
-import type { AstNode } from './Node';
+import type { CstNode } from './Node';
 import { ParserState } from './ParserState';
 import { ParseError, ParseErrorCode } from './ParseError';
 
@@ -12,9 +12,9 @@ import { ParseError, ParseErrorCode } from './ParseError';
  * Description placeholder
  *
  * @param {Parser} parser
- * @returns {AstNode}
+ * @returns {CstNode}
  */
-const currentFunc = (parser: Parser): AstNode => {
+const currentFunc = (parser: Parser): CstNode => {
     const node = parser.stack[parser.stack.length - 1];
     if (node.type !== NodeType.Function)
         throw new Error('Parser error: Expected a FunctionNode on the stack.');
@@ -28,7 +28,7 @@ const currentFunc = (parser: Parser): AstNode => {
  * @param {Token} token
  */
 export const createIdentifier: Action = (parser: Parser, token: Token) => {
-    const node: AstNode = {
+    const node: CstNode = {
         type: NodeType.Identifier,
         name: token.value,
     };
@@ -42,7 +42,7 @@ export const createIdentifier: Action = (parser: Parser, token: Token) => {
  * @param {Token} token
  */
 export const createHexColor: Action = (parser: Parser, token: Token) => {
-    const node: AstNode = {
+    const node: CstNode = {
         type: NodeType.HexColor,
         value: token.value.slice(1),
     };
@@ -56,7 +56,7 @@ export const createHexColor: Action = (parser: Parser, token: Token) => {
  * @param {Token} token
  */
 export const startFunction: Action = (parser: Parser, token: Token) => {
-    const node: AstNode = {
+    const node: CstNode = {
         type: NodeType.Function,
         name: token.value.toLowerCase(),
         children: [],
@@ -89,7 +89,7 @@ export const finishFunction: Action = (parser: Parser, _token: Token) => {
  * @param {Token} token
  */
 export const createAndPushArgument: Action = (parser: Parser, token: Token) => {
-    let node: AstNode;
+    let node: CstNode;
 
     switch (token.type) {
         case TokenType.NUMBER:
@@ -152,7 +152,7 @@ export const createAndPushArgument: Action = (parser: Parser, token: Token) => {
  * @param {Token} token
  */
 export const createAndPushOperator: Action = (parser: Parser, token: Token) => {
-    const node: AstNode = {
+    const node: CstNode = {
         type: NodeType.Operator,
         value: token.value as ',' | '/',
     };

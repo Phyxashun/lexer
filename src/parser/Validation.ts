@@ -1,11 +1,11 @@
 // ./src/parser/Validation.ts
 
-import type { AstNode, FunctionNode } from './Node';
+import type { CstNode, FunctionNode } from './Node';
 import { NodeType } from './Node';
 import { ParseError, ParseErrorCode } from './ParseError';
 
 // A generic function that validates a single argument node.
-type ArgumentValidator = (arg: AstNode) => boolean;
+type ArgumentValidator = (arg: CstNode) => boolean;
 
 // A specification for how to validate a function's arguments.
 interface FunctionSpec {
@@ -16,9 +16,9 @@ interface FunctionSpec {
 }
 
 // --- Individual Argument Validators ---
-const isNumber = (n: AstNode) => n.type === NodeType.Number;
-const isPercentage = (n: AstNode) => n.type === NodeType.Percentage;
-const isAngle = (n: AstNode) =>
+const isNumber = (n: CstNode) => n.type === NodeType.Number;
+const isPercentage = (n: CstNode) => n.type === NodeType.Percentage;
+const isAngle = (n: CstNode) =>
     n.type === NodeType.Dimension &&
     ['deg', 'rad', 'grad', 'turn'].includes(n.unit);
 
@@ -51,7 +51,7 @@ export const validationTable: Record<string, FunctionSpec> = {
  * The main validation function. It takes a completed CST node and checks it for semantic correctness.
  * It throws a ParseError if validation fails.
  */
-export function validate(node: AstNode): void {
+export function validate(node: CstNode): void {
     if (node.type !== NodeType.Function) {
         // Hex colors and identifiers are considered valid by default if they were parsed.
         return;
