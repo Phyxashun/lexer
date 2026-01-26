@@ -2,12 +2,12 @@
 
 import { styleText } from 'node:util';
 import { formatSourceError } from '../utils/ErrorFormatter';
-import { Span } from './Span';
+import { Token } from './Token';
 
 export class LexerError extends Error {
     constructor(
         public message: string,
-        public span: Span,
+        public token: Token,
         public source: string,
     ) {
         super(message);
@@ -24,22 +24,24 @@ export class LexerError extends Error {
         return formatSourceError(
             'Lexer Error',
             this.message,
-            this.span,
+            this.token.span,
             this.source,
         );
     }
 
     public getDetailedMessage(): string {
-        const lineStr = this.source.split('\n')[this.span.line - 1];
-        const padding = ' '.repeat(this.span.column - 1);
+        const lineStr = this.source.split('\n')[this.token.span.line - 1];
+        const padding = ' '.repeat(this.token.span.column - 1);
         const underline = styleText(
             'red',
-            '^'.repeat(Math.max(1, this.span.end - this.span.start)),
+            '^'.repeat(
+                Math.max(1, this.token.span.end - this.token.span.start),
+            ),
         );
 
         return [
             styleText('red', `Lexer Error: ${this.message}`),
-            `At line ${this.span.line}, column ${this.span.column}:`,
+            `At line ${this.token.span.line}, column ${this.token.span.column}:`,
             '',
             `  ${lineStr}`,
             `  ${padding}${underline}`,

@@ -43,21 +43,10 @@ export enum State {
     EOF = 'EOF',
 }
 
-/**
- * Description placeholder
- *
- * @export
- * @typedef {TransitionTable}
- */
 export type TransitionTable = Partial<
     Record<State, Partial<Record<CharType, State>>>
 >;
 
-/**
- * Description placeholder
- *
- * @type {TransitionTable}
- */
 export const DFA: TransitionTable = {
     [State.InitialState]: {
         [CharType.EOF]: State.EOF,
@@ -154,11 +143,6 @@ export const DFA: TransitionTable = {
     },
 };
 
-/**
- * Description placeholder
- *
- * @type {Partial<Record<State, TokenType>>}
- */
 export const ACCEPT: Partial<Record<State, TokenType>> = {
     // identifiers
     [State.Identifier]: TokenType.IDENTIFIER,
@@ -187,10 +171,6 @@ export const ACCEPT: Partial<Record<State, TokenType>> = {
     [State.EOF]: TokenType.EOF,
 };
 
-/**
- * A comprehensive set of CSS dimensions available as of 2026,
- * categorized by length, angle, time, resolution, and grIdentifier.
- */
 export const DIMENSIONS = new Set([
     // Absolute Lengths
     'px',
@@ -252,18 +232,8 @@ export const DIMENSIONS = new Set([
     '%',
 ]);
 
-/**
- * Description placeholder
- *
- * @type {*}
- */
 export const KEYWORDS = new Set(['none', 'currentcolor']);
 
-/**
- * Description placeholder
- *
- * @type {*}
- */
 export const FUNCTIONS = new Set([
     'rgb',
     'rgba',
@@ -276,57 +246,199 @@ export const FUNCTIONS = new Set([
     'color-mix',
 ]);
 
-/**
- * Description placeholder
- *
- * @export
- * @param {Token} token
- * @returns {Token}
- */
+export const COLORS: Set<string> = new Set<string>(
+    [
+        'black',
+        'silver',
+        'gray',
+        'white',
+        'maroon',
+        'red',
+        'purple',
+        'fuchsia',
+        'green',
+        'lime',
+        'olive',
+        'yellow',
+        'navy',
+        'blue',
+        'teal',
+        'aqua',
+        'aliceblue',
+        'antiquewhite',
+        'aqua',
+        'aquamarine',
+        'azure',
+        'beige',
+        'bisque',
+        'black',
+        'blanchedalmond',
+        'blue',
+        'blueviolet',
+        'brown',
+        'burlywood',
+        'cadetblue',
+        'chartreuse',
+        'chocolate',
+        'coral',
+        'cornflowerblue',
+        'cornsilk',
+        'crimson',
+        'cyan',
+        'darkblue',
+        'darkcyan',
+        'darkgoldenrod',
+        'darkgray',
+        'darkgreen',
+        'darkgrey',
+        'darkkhaki',
+        'darkmagenta',
+        'darkolivegreen',
+        'darkorange',
+        'darkorchid',
+        'darkred',
+        'darksalmon',
+        'darkseagreen',
+        'darkslateblue',
+        'darkslategray',
+        'darkslategrey',
+        'darkturquoise',
+        'darkviolet',
+        'deeppink',
+        'deepskyblue',
+        'dimgray',
+        'dimgrey',
+        'dodgerblue',
+        'firebrick',
+        'floralwhite',
+        'forestgreen',
+        'fuchsia',
+        'gainsboro',
+        'ghostwhite',
+        'gold',
+        'goldenrod',
+        'gray',
+        'green',
+        'greenyellow',
+        'grey',
+        'honeydew',
+        'hotpink',
+        'indianred',
+        'indigo',
+        'ivory',
+        'khaki',
+        'lavender',
+        'lavenderblush',
+        'lawngreen',
+        'lemonchiffon',
+        'lightblue',
+        'lightcoral',
+        'lightcyan',
+        'lightgoldenrodyellow',
+        'lightgray',
+        'lightgreen',
+        'lightgrey',
+        'lightpink',
+        'lightsalmon',
+        'lightseagreen',
+        'lightskyblue',
+        'lightslategray',
+        'lightslategrey',
+        'lightsteelblue',
+        'lightyellow',
+        'lime',
+        'limegreen',
+        'linen',
+        'magenta',
+        'maroon',
+        'mediumaquamarine',
+        'mediumblue',
+        'mediumorchid',
+        'mediumpurple',
+        'mediumseagreen',
+        'mediumslateblue',
+        'mediumspringgreen',
+        'mediumturquoise',
+        'mediumvioletred',
+        'midnightblue',
+        'mintcream',
+        'mistyrose',
+        'moccasin',
+        'navajowhite',
+        'navy',
+        'oldlace',
+        'olive',
+        'olivedrab',
+        'orange',
+        'orangered',
+        'orchid',
+        'palegoldenrod',
+        'palegreen',
+        'paleturquoise',
+        'palevioletred',
+        'papayawhip',
+        'peachpuff',
+        'peru',
+        'pink',
+        'plum',
+        'powderblue',
+        'purple',
+        'rebeccapurple',
+        'red',
+        'rosybrown',
+        'royalblue',
+        'saddlebrown',
+        'salmon',
+        'sandybrown',
+        'seagreen',
+        'seashell',
+        'sienna',
+        'silver',
+        'skyblue',
+        'slateblue',
+        'slategray',
+        'slategrey',
+        'snow',
+        'springgreen',
+        'steelblue',
+        'tan',
+        'teal',
+        'thistle',
+        'tomato',
+        'transparent',
+        'turquoise',
+        'violet',
+        'wheat',
+        'white',
+        'whitesmoke',
+        'yellow',
+        'yellowgreen',
+    ].sort(),
+);
+
 export function foldIdentifierToken(token: Token): Token {
     const v = token.value.toLowerCase();
+    let type: TokenType;
 
-    if (FUNCTIONS.has(v)) {
-        // Valid Function Tokens
-        return { ...token, type: TokenType.FUNCTION, message: 'Function' };
-    } else if (KEYWORDS.has(v)) {
-        // Valid Keyword Tokens
-        return { ...token, type: TokenType.KEYWORD, message: 'Keyword' };
-    } else if (DIMENSIONS.has(v)) {
-        // Valid Dimension Tokens
-        return { ...token, type: TokenType.DIMENSION, message: 'Dimension' };
-    } else if (v.startsWith('--')) {
-        // Valid Property Tokens
-        return { ...token, type: TokenType.PROPERTY, message: 'Property' };
-    } else {
-        // Invalid identifiers
-        return {
-            ...token,
-            type: TokenType.ERROR,
-            message: 'Invalid identifier',
-        };
-    }
+    if (FUNCTIONS.has(v)) type = TokenType.FUNCTION;
+    else if (KEYWORDS.has(v)) type = TokenType.KEYWORD;
+    else if (DIMENSIONS.has(v)) type = TokenType.DIMENSION;
+    else if (COLORS.has(v)) type = TokenType.COLOR;
+    else if (v.startsWith('--')) type = TokenType.PROPERTY;
+    else type = TokenType.ERROR;
+
+    return {
+        ...token,
+        type,
+        message: type === TokenType.ERROR ? 'Unknown identifier' : type,
+    };
 }
 
-/**
- * Description placeholder
- *
- * @export
- * @param {LexerState} state
- * @returns {boolean}
- */
 export function isHexState(state: LexerState): boolean {
     const result = state >= LexerState.HEX1 && state <= LexerState.HEX8;
     return result;
 }
 
-/**
- * Description placeholder
- *
- * @export
- * @param {LexerState} state
- * @returns {boolean}
- */
 export function isValidHexEnd(state: LexerState): boolean {
     return (
         state === LexerState.HEX3 ||
@@ -336,13 +448,6 @@ export function isValidHexEnd(state: LexerState): boolean {
     );
 }
 
-/**
- * Description placeholder
- *
- * @export
- * @param {State} state
- * @returns {boolean}
- */
 export function isErrorState(state: State): boolean {
     return state === State.ErrorChar || state === State.ErrorToken;
 }

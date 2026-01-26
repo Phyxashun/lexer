@@ -2,7 +2,6 @@
 
 import { TokenType, type Token, type Span } from './Token';
 import { State, DFA, ACCEPT, foldIdentifierToken } from './State';
-import { LexerError } from './LexerError';
 import { Char } from '../char/Char';
 
 const typesToSkip = new Set([]);
@@ -101,7 +100,13 @@ export class Lexer {
             token.type === TokenType.ERROR &&
             message === 'Unexpected character'
         ) {
-            throw new LexerError(message, token.span, this.rawSource);
+            this.tokens.push(
+                this.createToken(
+                    TokenType.ERROR,
+                    'Unexpected character when lexing',
+                ),
+            );
+            //throw new LexerError(message, token, this.rawSource);
         }
 
         if (this.buffer.length > 0 || type === TokenType.EOF) {

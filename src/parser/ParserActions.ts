@@ -8,12 +8,6 @@ import type { CstNode } from './Node';
 import { ParserState } from './ParserState';
 import { ParseError, ParseErrorCode } from './ParseError';
 
-/**
- * Description placeholder
- *
- * @param {Parser} parser
- * @returns {CstNode}
- */
 const currentFunc = (parser: Parser, token: Token): FunctionNode => {
     const node = parser.stack[parser.stack.length - 1];
 
@@ -40,12 +34,6 @@ const currentFunc = (parser: Parser, token: Token): FunctionNode => {
     return node as FunctionNode;
 };
 
-/**
- * Description placeholder
- *
- * @param {Parser} parser
- * @param {Token} token
- */
 export const createIdentifier: Action = (parser: Parser, token: Token) => {
     const node: CstNode = {
         type: NodeType.Identifier,
@@ -56,12 +44,6 @@ export const createIdentifier: Action = (parser: Parser, token: Token) => {
     console.log('INSIDE PARSER ACTIONS, NODE:', node);
 };
 
-/**
- * Description placeholder
- *
- * @param {Parser} parser
- * @param {Token} token
- */
 export const createHexColor: Action = (parser: Parser, token: Token) => {
     const node: CstNode = {
         type: NodeType.HexColor,
@@ -71,12 +53,6 @@ export const createHexColor: Action = (parser: Parser, token: Token) => {
     parser.cst = node;
 };
 
-/**
- * Description placeholder
- *
- * @param {Parser} parser
- * @param {Token} token
- */
 export const startFunction: Action = (parser: Parser, token: Token) => {
     const node: CstNode = {
         type: NodeType.Function,
@@ -90,12 +66,6 @@ export const startFunction: Action = (parser: Parser, token: Token) => {
     parser.stack.push(node);
 };
 
-/**
- * Description placeholder
- *
- * @param {Parser} parser
- * @param {Token} _token
- */
 export const finishFunction: Action = (parser: Parser, token: Token) => {
     const finishedNode = parser.stack.pop() as FunctionNode;
     if (!finishedNode) throw new Error('Stack was empty.');
@@ -113,63 +83,57 @@ export const finishFunction: Action = (parser: Parser, token: Token) => {
     }
 };
 
-/**
- * Description placeholder
- *
- * @param {Parser} parser
- * @param {Token} token
- */
 export const createAndPushArgument: Action = (parser: Parser, token: Token) => {
     let node: CstNode;
+    const base = { span: token.span };
 
     switch (token.type) {
         case TokenType.NUMBER:
             node = {
+                ...base,
                 type: NodeType.Number,
                 value: token.value,
-                span: token.span,
             };
-            break;
+
         case TokenType.PERCENTAGE:
             node = {
+                ...base,
                 type: NodeType.Percentage,
                 value: token.value.replace(/%/g, ''),
-                span: token.span,
             };
-            break;
+
         case TokenType.DIMENSION: {
-            const dimensionPattern = new RegExp(/^(-?\d*\.?\d+)(.*)$/);
-            const match = dimensionPattern.exec(token.value);
+            const match = /^(-?\d*\.?\d+)(.*)$/.exec(token.value);
             node = {
+                ...base,
                 type: NodeType.Dimension,
                 value: match ? match[1] : '',
                 unit: match ? match[2] : token.value,
-                span: token.span,
             };
-            break;
         }
+
         case TokenType.IDENTIFIER:
             node = {
+                ...base,
                 type: NodeType.Identifier,
                 name: token.value,
-                span: token.span,
             };
-            break;
+
         case TokenType.WHITESPACE:
             node = {
+                ...base,
                 type: NodeType.WhiteSpace,
                 value: ' ',
-                span: token.span,
             };
-            break;
+
         case TokenType.SLASH:
         case TokenType.COMMA:
             node = {
+                ...base,
                 type: NodeType.Operator,
                 value: token.value as ',' | '/',
-                span: token.span,
             };
-            break;
+
         default:
             throw new ParseError(
                 `Cannot use token of type '${token.type}' as a function argument`,

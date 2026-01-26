@@ -91,6 +91,7 @@ export class Parser {
                 );
             }
         }
+
         validate(this.cst, this.rawSource);
         return this.cst;
     }

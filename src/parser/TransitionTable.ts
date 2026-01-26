@@ -6,7 +6,6 @@ import { TokenType } from '../lexer/Token';
 import * as actions from './ParserActions';
 
 export const CSSColorParserTable: TransitionTable = {
-    // State: Initial
     [ParserState.Initial]: {
         [TokenType.IDENTIFIER]: {
             action: actions.createIdentifier,
@@ -22,8 +21,6 @@ export const CSSColorParserTable: TransitionTable = {
         },
     },
 
-    // State: AwaitLeftParen
-    // (Just saw 'rgb', expecting '(')
     [ParserState.AwaitLeftParen]: {
         [TokenType.LPAREN]: {
             action: actions.consumeToken,
@@ -31,8 +28,6 @@ export const CSSColorParserTable: TransitionTable = {
         },
     },
 
-    // State: AwaitArgument
-    // (Inside a function, expecting a value or a closing paren)
     [ParserState.AwaitArgument]: {
         // These are the actual values
         [TokenType.NUMBER]: {
@@ -79,8 +74,6 @@ export const CSSColorParserTable: TransitionTable = {
         },
     },
 
-    // State: AwaitSeparator
-    // (Just saw an argument, expecting a delimiter or closing paren)
     [ParserState.AwaitSeparator]: {
         [TokenType.COMMA]: {
             action: actions.createAndPushOperator,
@@ -94,8 +87,6 @@ export const CSSColorParserTable: TransitionTable = {
             action: actions.finishFunction,
             nextState: ParserState.Complete,
         },
-        // Implicit space separator
-        // (if we get another argument, we transition back)
         [TokenType.NUMBER]: {
             action: actions.createAndPushArgument,
             nextState: ParserState.AwaitSeparator,
