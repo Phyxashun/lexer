@@ -52,93 +52,96 @@ export const validationTable: Record<string, FunctionSpec> = {
  * It throws a ParseError if validation fails.
  */
 export function validate(node: CstNode, rawSource: string): void {
-    // --- Hex Color Validation ---
+    // ---------- Hex ----------
     if (node.type === NodeType.HexColor) {
-        const hexValue = node.value; // already sliced off the '#'
+        const hex = node.value;
 
-        // Check for non-hex characters (0-9, a-f)
-        if (!/^[0-9a-fA-F]+$/.test(hexValue)) {
+        if (!/^[0-9a-fA-F]+$/.test(hex)) {
             throw new ParseError(
-                `Hex color contains invalid characters`,
+                'Hex color contains invalid characters',
                 ParseErrorCode.INVALID_ARGUMENT,
                 'Validation',
                 node,
                 rawSource,
             );
         }
-        return;
 
-        const validLengths = [3, 4, 6, 8];
-
-        if (!validLengths.includes(hexValue.length)) {
+        if (![3, 4, 6, 8].includes(hex.length)) {
             throw new ParseError(
-                `Invalid Hex color length: expected 3, 4, 6, or 8 chars, but got ${hexValue.length}`,
+                `Invalid hex length ${hex.length}`,
                 ParseErrorCode.INVALID_ARGUMENT,
                 'Validation',
                 node,
                 rawSource,
             );
         }
-    }
 
-    if (node.type !== NodeType.Function) {
-        // Hex colors and identifiers are considered valid by default if they were parsed.
         return;
     }
 
-    // It's a function, find its specification.
+    // ---------- Non-functions ----------
+    if (node.type !== NodeType.Function) return;
+
     const spec = validationTable[node.name];
-    if (!spec) {
-        // If the function is not in our table, we can either ignore it or error.
-        // For now, let's assume unknown functions are valid.
-        return;
-    }
+    if (!spec) return;
 
-    // Filter out whitespace and operators to get the actual semantic arguments.
-    const semanticArgs: [] = node.children.filter(
-        child =>
-            child.type !== NodeType.WhiteSpace &&
-            child.type !== NodeType.Operator,
+    // ---------- Strip trivia ----------
+    const meaningful = node.children.filter(
+        n => n.type !== NodeType.WhiteSpace && n.type !== NodeType.Operator,
     );
 
-    // Check for alpha value
-    const expectedArgCount: number = spec.args.length;
-    if (spec.alpha && semanticArgs.length === expectedArgCount + 1) {
-        const alphaArg = semanticArgs[semanticArgs.length - 1];
-        if (!isNumber(alphaArg) && !isPercentage(alphaArg)) {
+    // ---------- Split on slash ----------
+    const slashIndex = meaningful.findIndex(n => n.type === NodeType.Slash);
+
+    let args: CstNode[];
+    let alpha: CstNode | null = null;
+
+    if (slashIndex !== -1) {
+        args = meaningful.slice(0, slashIndex);
+        alpha = meaningful[slashIndex + 1] ?? null;
+
+        if (!spec.alpha) {
             throw new ParseError(
-                `Invalid alpha value for function '${(node as FunctionNode).name}'`,
+                `Function '${node.name}' does not accept alpha`,
                 ParseErrorCode.INVALID_ARGUMENT,
-                null,
-                null,
+                'Validation',
+                { span: node.span },
+                rawSource,
             );
         }
-        // If alpha is valid, we don't include it in the main argument check.
-        semanticArgs.pop();
+
+        if (!alpha || (!isNumber(alpha) && !isPercentage(alpha))) {
+            throw new ParseError(
+                `Invalid alpha value`,
+                ParseErrorCode.INVALID_ARGUMENT,
+                'Validation',
+                { span: alpha?.span ?? node.span },
+                rawSource,
+            );
+        }
+    } else {
+        args = meaningful;
     }
 
-    // Now, check if the number of arguments matches the spec.
-    if (semanticArgs.length !== expectedArgCount) {
+    // ---------- Arity ----------
+    if (args.length !== spec.args.length) {
         throw new ParseError(
-            `Function '${node.name}' expected ${expectedArgCount} arguments, but received ${semanticArgs.length}`,
+            `Function '${node.name}' expected ${spec.args.length} arguments, but received ${args.length}`,
             ParseErrorCode.INVALID_ARGUMENT,
             'Validation',
-            // Use the function's own span to point the caret at the function name
             { span: node.span },
             rawSource,
         );
     }
 
-    // Finally, check if each argument has the correct type.
-    for (let i = 0; i < expectedArgCount; i++) {
-        const arg = semanticArgs[i];
-        const validator = spec.args[i];
-        if (!validator(arg)) {
+    // ---------- Type checking ----------
+    for (let i = 0; i < spec.args.length; i++) {
+        if (!spec.args[i](args[i])) {
             throw new ParseError(
-                `Argument ${i + 1} of function '${node.name}' is invalid...`,
+                `Argument ${i + 1} of '${node.name}' is invalid`,
                 ParseErrorCode.INVALID_ARGUMENT,
                 'Validation',
-                { span: arg.span },
+                { span: args[i].span },
                 rawSource,
             );
         }
