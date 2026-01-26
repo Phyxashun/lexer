@@ -1,27 +1,18 @@
 // ./src/parser/Parser.ts
 
 import { TokenType, type Token } from '../lexer/Token';
-import { ParserState, type TransitionTable } from './ParserState';
 import { ParseError, ParseErrorCode } from './ParseError';
-import { CSSColorParserTable } from './TransitionTable';
 import type { CstNode, FunctionNode } from './Node';
+import { NodeType } from './Node';
 import { validate } from './Validation';
 
 export class Parser {
-    private readonly tokens: Token[];
     private pos = 0;
-    public readonly rawSource: string;
 
-    private readonly table: TransitionTable;
-    public state: ParserState = ParserState.Initial;
-    public stack: CstNode[] = [];
-    public cst: CstNode | null = null;
-
-    constructor(tokens: Token[], rawSource?: string) {
-        this.tokens = tokens;
-        this.rawSource = rawSource;
-        this.table = CSSColorParserTable;
-    }
+    constructor(
+        public readonly tokens: Token[],
+        public readonly rawSource?: string,
+    ) {}
 
     private isEOF(): boolean {
         return (
@@ -45,55 +36,28 @@ export class Parser {
         return token;
     }
 
-    public Oparse(): CstNode {
-        while (!this.isEOF()) {
-            const token = this.peek();
-            if (!token || token.type === TokenType.EOF) break;
+    private expect(type: TokenType): Token {
+        const token = this.peek();
 
-            const transition = this.table[this.state]?.[token.type];
-
-            if (!transition) {
-                throw new ParseError(
-                    `Unknown or unexpected identifier '${token.value}'.`,
-                    ParseErrorCode.UNEXPECTED_TOKEN,
-                    ParserState[this.state],
-                    token,
-                    this.rawSource,
-                );
-            }
-            this.consume();
-            transition.action(this, token);
-            this.state = transition.nextState;
-
-            if (this.state === ParserState.Complete) break;
+        if (token.type !== type) {
+            throw new ParseError(
+                `Expected token '${type}', but found '${token.value}'.`,
+                ParseErrorCode.UNEXPECTED_TOKEN,
+                'Parser',
+                token,
+                this.rawSource,
+            );
         }
 
-        if (this.cst === null) {
-            const errorToken =
-                this.tokens[this.pos] ?? this.tokens[this.tokens.length - 1];
+        return this.consume();
+    }
 
-            if (this.stack.length > 0) {
-                const openFunc: FunctionNode = this.stack[0] as FunctionNode;
-                throw new ParseError(
-                    `Function '${openFunc.name}' was not closed with a ')'`,
-                    ParseErrorCode.UNCLOSED_FUNCTION,
-                    this.state,
-                    errorToken,
-                    this.rawSource,
-                );
-            } else {
-                throw new ParseError(
-                    'Parsing finished without finding a valid CSS color.',
-                    ParseErrorCode.UNEXPECTED_EOF,
-                    ParserState[this.state],
-                    errorToken,
-                    this.rawSource,
-                );
-            }
-        }
+    private match(type: TokenType): boolean {
+        return this.peek().type === type;
+    }
 
-        validate(this.cst, this.rawSource);
-        return this.cst;
+    private peekPrev(): Token {
+        return this.tokens[this.pos - 1] ?? this.tokens[0];
     }
 
     public parse(): CstNode {
@@ -121,7 +85,7 @@ export class Parser {
     }
 
     private HexColor(): HexColorNode {
-        const token = this.consume();
+        const token = this.expect(TokenType.HEX_COLOR);
         return {
             type: NodeType.HexColor,
             value: token.value.slice(1),
@@ -130,7 +94,7 @@ export class Parser {
     }
 
     private NamedColor(): NamedColorNode {
-        const token = this.consume();
+        const token = this.expect(TokenType.COLOR);
         return {
             type: NodeType.NamedColor,
             name: token.value,
@@ -139,7 +103,8 @@ export class Parser {
     }
 
     private Function(): FunctionNode {
-        const nameToken = this.consume();
+        const nameToken = this.expect(TokenType.FUNCTION);
+
         const node: FunctionNode = {
             type: NodeType.Function,
             name: nameToken.value.toLowerCase(),
@@ -164,24 +129,23 @@ export class Parser {
 
     private Arguments(func: FunctionNode): void {
         while (!this.match(TokenType.RPAREN)) {
+            while (this.match(TokenType.WHITESPACE)) {
+                func.children.push(this.Whitespace());
+            }
+
+            if (this.match(TokenType.RPAREN)) break;
+
+            if (this.match(TokenType.COMMA)) {
+                func.children.push(this.Comma());
+                continue;
+            }
+
+            if (this.match(TokenType.SLASH)) {
+                func.children.push(this.Slash());
+                continue;
+            }
+
             func.children.push(this.Argument());
-
-            if (this.match(TokenType.COMMA) || this.match(TokenType.SLASH)) {
-                const op = this.consume();
-                func.children.push({
-                    type: NodeType.Operator,
-                    value: op.value as ',' | '/',
-                    span: op.span,
-                });
-                continue;
-            }
-
-            if (this.match(TokenType.WHITESPACE)) {
-                func.children.push(this.parseWhitespace());
-                continue;
-            }
-
-            break;
         }
     }
 
@@ -190,7 +154,7 @@ export class Parser {
 
         switch (token.type) {
             case TokenType.NUMBER:
-                return this.Number();
+                return this.NumericLiteral();
 
             case TokenType.PERCENTAGE:
                 return this.Percentage();
@@ -207,5 +171,81 @@ export class Parser {
             default:
                 throw this.unexpected(token);
         }
+    }
+
+    private Whitespace(): CstNode {
+        const token = this.expect(TokenType.WHITESPACE);
+        return {
+            type: NodeType.WhiteSpace,
+            value: ' ',
+            span: token.span,
+        };
+    }
+
+    private Comma(): CstNode {
+        const token = this.expect(TokenType.COMMA);
+        return {
+            type: NodeType.Operator,
+            value: ',',
+            span: token.span,
+        };
+    }
+
+    private Slash(): CstNode {
+        const token = this.expect(TokenType.SLASH);
+        return {
+            type: NodeType.Slash,
+            value: '/',
+            span: token.span,
+        };
+    }
+
+    private NumericLiteral(): CstNode {
+        const token = this.expect(TokenType.NUMBER);
+        return {
+            type: NodeType.Number,
+            value: token.value,
+            span: token.span,
+        };
+    }
+
+    private Percentage(): CstNode {
+        const token = this.expect(TokenType.PERCENTAGE);
+        return {
+            type: NodeType.Percentage,
+            value: token.value.replace(/%/g, ''),
+            span: token.span,
+        };
+    }
+
+    private Dimension(): CstNode {
+        const token = this.expect(TokenType.DIMENSION);
+        const [, value = '', unit = token.value] =
+            /^(-?\d*\.?\d+)(.*)$/.exec(token.value) ?? [];
+        return {
+            type: NodeType.Dimension,
+            value,
+            unit,
+            span: token.span,
+        };
+    }
+
+    private Identifier(): CstNode {
+        const token = this.expect(TokenType.IDENTIFIER);
+        return {
+            type: NodeType.Identifier,
+            value: token.value,
+            span: token.span,
+        };
+    }
+
+    private unexpected(token: Token): never {
+        throw new ParseError(
+            `Unexpected token type: '${token.type}' with value: '${token.value}'.`,
+            ParseErrorCode.UNEXPECTED_TOKEN,
+            'Parser',
+            token,
+            this.rawSource,
+        );
     }
 }
