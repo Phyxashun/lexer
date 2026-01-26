@@ -102,7 +102,7 @@ export class Parser {
         };
     }
 
-    private parseunction(): FunctionNode {
+    private parseFunction(): FunctionNode {
         const nameToken = this.expect(TokenType.FUNCTION);
 
         const node: FunctionNode = {
