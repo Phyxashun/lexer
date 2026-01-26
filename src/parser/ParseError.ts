@@ -20,8 +20,8 @@ export class ParseError extends Error {
     ) {
         super(message);
         this.name = 'ParseError';
-
         Object.setPrototypeOf(this, ParseError.prototype);
+        Error.captureStackTrace(this, this.constructor);
     }
 
     public override toString(): string {
@@ -32,14 +32,5 @@ export class ParseError extends Error {
             this.token.span,
             this.source,
         );
-    }
-
-    public getDetailedMessage(): string {
-        let details = `${this.name} (${this.code}) in state '${this.stateName}': ${this.message}`;
-        if (this.token && this.token.span) {
-            details += `\n  - Offending Token: '${this.token.value}' (Type: ${this.token.type})`;
-            details += `\n  - Position: Start ${this.token.span.start}, End ${this.token.span.end}`;
-        }
-        return details;
     }
 }

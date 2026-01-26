@@ -61,30 +61,30 @@ export class Parser {
     }
 
     public parse(): CstNode {
-        const node = this.Color();
+        const node = this.parseColor();
         validate(node, this.rawSource);
         return node;
     }
 
-    private Color(): CstNode {
+    private parseColor(): CstNode {
         const token = this.peek();
 
         switch (token.type) {
             case TokenType.COLOR:
-                return this.NamedColor();
+                return this.parseNamedColor();
 
             case TokenType.HEX_COLOR:
-                return this.HexColor();
+                return this.parseHexColor();
 
             case TokenType.FUNCTION:
-                return this.Function();
+                return this.parseFunction();
 
             default:
                 throw this.unexpected(token);
         }
     }
 
-    private HexColor(): HexColorNode {
+    private parseHexColor(): HexColorNode {
         const token = this.expect(TokenType.HEX_COLOR);
         return {
             type: NodeType.HexColor,
@@ -93,7 +93,7 @@ export class Parser {
         };
     }
 
-    private NamedColor(): NamedColorNode {
+    private parseNamedColor(): NamedColorNode {
         const token = this.expect(TokenType.COLOR);
         return {
             type: NodeType.NamedColor,
@@ -102,7 +102,7 @@ export class Parser {
         };
     }
 
-    private Function(): FunctionNode {
+    private parseunction(): FunctionNode {
         const nameToken = this.expect(TokenType.FUNCTION);
 
         const node: FunctionNode = {
@@ -115,7 +115,7 @@ export class Parser {
         this.expect(TokenType.LPAREN);
 
         if (!this.match(TokenType.RPAREN)) {
-            this.Arguments(node);
+            this.parseArguments(node);
             this.expect(TokenType.RPAREN);
         }
 
@@ -127,65 +127,65 @@ export class Parser {
         return node;
     }
 
-    private Arguments(func: FunctionNode): void {
+    private parseArguments(func: FunctionNode): void {
         while (!this.match(TokenType.RPAREN)) {
             while (this.match(TokenType.WHITESPACE)) {
-                func.children.push(this.Whitespace());
+                func.children.push(this.parseWhitespace());
             }
 
             if (this.match(TokenType.RPAREN)) break;
 
             if (this.match(TokenType.COMMA)) {
-                func.children.push(this.Comma());
+                func.children.push(this.parseComma());
                 continue;
             }
 
             if (this.match(TokenType.SLASH)) {
-                func.children.push(this.Slash());
+                func.children.push(this.parseSlash());
                 continue;
             }
 
-            func.children.push(this.Argument());
+            func.children.push(this.parseArgument());
         }
     }
 
-    private Argument(): CstNode {
+    private parseArgument(): CstNode {
         const token = this.peek();
 
         switch (token.type) {
             case TokenType.COLOR:
-                return this.NamedColor();
+                return this.parseNamedColor();
 
             case TokenType.HEX_COLOR:
-                return this.HexColor();
+                return this.parseHexColor();
 
             case TokenType.NUMBER:
-                return this.NumericLiteral();
+                return this.parseNumericLiteral();
 
             case TokenType.PERCENTAGE:
-                return this.Percentage();
+                return this.parsePercentage();
 
             case TokenType.DIMENSION:
-                return this.Dimension();
+                return this.parseDimension();
 
             case TokenType.IDENTIFIER:
-                return this.Identifier();
+                return this.parseIdentifier();
 
             case TokenType.KEYWORD:
-                return this.Keyword();
+                return this.parseKeyword();
 
             case TokenType.CHANNEL:
-                return this.Channel();
+                return this.parseChannel();
 
             case TokenType.FUNCTION:
-                return this.Function();
+                return this.parseFunction();
 
             default:
                 throw this.unexpected(token);
         }
     }
 
-    private Whitespace(): CstNode {
+    private parseWhitespace(): CstNode {
         const token = this.expect(TokenType.WHITESPACE);
         return {
             type: NodeType.WhiteSpace,
@@ -194,7 +194,7 @@ export class Parser {
         };
     }
 
-    private Comma(): CstNode {
+    private parseComma(): CstNode {
         const token = this.expect(TokenType.COMMA);
         return {
             type: NodeType.Operator,
@@ -203,7 +203,7 @@ export class Parser {
         };
     }
 
-    private Slash(): CstNode {
+    private parseSlash(): CstNode {
         const token = this.expect(TokenType.SLASH);
         return {
             type: NodeType.Slash,
@@ -212,7 +212,7 @@ export class Parser {
         };
     }
 
-    private NumericLiteral(): CstNode {
+    private parseNumericLiteral(): CstNode {
         const token = this.expect(TokenType.NUMBER);
         return {
             type: NodeType.Number,
@@ -221,7 +221,7 @@ export class Parser {
         };
     }
 
-    private Percentage(): CstNode {
+    private parsePercentage(): CstNode {
         const token = this.expect(TokenType.PERCENTAGE);
         return {
             type: NodeType.Percentage,
@@ -230,7 +230,7 @@ export class Parser {
         };
     }
 
-    private Dimension(): CstNode {
+    private parseDimension(): CstNode {
         const token = this.expect(TokenType.DIMENSION);
         const [, value = '', unit = token.value] =
             /^(-?\d*\.?\d+)(.*)$/.exec(token.value) ?? [];
@@ -242,7 +242,7 @@ export class Parser {
         };
     }
 
-    private Identifier(): CstNode {
+    private parseIdentifier(): CstNode {
         const token = this.expect(TokenType.IDENTIFIER);
         return {
             type: NodeType.Identifier,
@@ -251,7 +251,7 @@ export class Parser {
         };
     }
 
-    private Keyword(): CstNode {
+    private parseKeyword(): CstNode {
         const token = this.expect(TokenType.KEYWORD);
         return {
             type: NodeType.Keyword,
@@ -260,7 +260,7 @@ export class Parser {
         };
     }
 
-    private Channel(): CstNode {
+    private parseChannel(): CstNode {
         const token = this.expect(TokenType.CHANNEL);
         return {
             type: NodeType.Channel,
