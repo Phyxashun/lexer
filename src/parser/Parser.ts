@@ -45,7 +45,7 @@ export class Parser {
         return token;
     }
 
-    public parse(): CstNode {
+    public Oparse(): CstNode {
         while (!this.isEOF()) {
             const token = this.peek();
             if (!token || token.type === TokenType.EOF) break;
@@ -94,5 +94,118 @@ export class Parser {
 
         validate(this.cst, this.rawSource);
         return this.cst;
+    }
+
+    public parse(): CstNode {
+        const node = this.Color();
+        validate(node, this.rawSource);
+        return node;
+    }
+
+    private Color(): CstNode {
+        const token = this.peek();
+
+        switch (token.type) {
+            case TokenType.HEX_COLOR:
+                return this.HexColor();
+
+            case TokenType.COLOR:
+                return this.NamedColor();
+
+            case TokenType.FUNCTION:
+                return this.Function();
+
+            default:
+                throw this.unexpected(token);
+        }
+    }
+
+    private HexColor(): HexColorNode {
+        const token = this.consume();
+        return {
+            type: NodeType.HexColor,
+            value: token.value.slice(1),
+            span: token.span,
+        };
+    }
+
+    private NamedColor(): NamedColorNode {
+        const token = this.consume();
+        return {
+            type: NodeType.NamedColor,
+            name: token.value,
+            span: token.span,
+        };
+    }
+
+    private Function(): FunctionNode {
+        const nameToken = this.consume();
+        const node: FunctionNode = {
+            type: NodeType.Function,
+            name: nameToken.value.toLowerCase(),
+            span: nameToken.span,
+            children: [],
+        };
+
+        this.expect(TokenType.LPAREN);
+
+        if (!this.match(TokenType.RPAREN)) {
+            this.Arguments(node);
+            this.expect(TokenType.RPAREN);
+        }
+
+        node.span = {
+            ...node.span,
+            length: this.peekPrev().span.end - node.span.start,
+        };
+
+        return node;
+    }
+
+    private Arguments(func: FunctionNode): void {
+        while (!this.match(TokenType.RPAREN)) {
+            func.children.push(this.Argument());
+
+            if (this.match(TokenType.COMMA) || this.match(TokenType.SLASH)) {
+                const op = this.consume();
+                func.children.push({
+                    type: NodeType.Operator,
+                    value: op.value as ',' | '/',
+                    span: op.span,
+                });
+                continue;
+            }
+
+            if (this.match(TokenType.WHITESPACE)) {
+                func.children.push(this.parseWhitespace());
+                continue;
+            }
+
+            break;
+        }
+    }
+
+    private Argument(): CstNode {
+        const token = this.peek();
+
+        switch (token.type) {
+            case TokenType.NUMBER:
+                return this.Number();
+
+            case TokenType.PERCENTAGE:
+                return this.Percentage();
+
+            case TokenType.DIMENSION:
+                return this.Dimension();
+
+            case TokenType.IDENTIFIER:
+                return this.Identifier();
+
+            case TokenType.FUNCTION:
+                return this.Function();
+
+            default:
+                throw this.unexpected(token);
+        }
     }
 }
