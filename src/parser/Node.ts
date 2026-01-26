@@ -5,6 +5,7 @@ import { Span } from '../lexer/Token';
 export enum NodeType {
     Function = 'Function',
     Identifier = 'Identifier',
+    NamedColor = 'NamedColor',
     HexColor = 'HexColor',
     Number = 'Number',
     Percentage = 'Percentage',
@@ -33,6 +34,11 @@ export interface FunctionNode extends CstNode {
 
 export interface IdentifierNode extends CstNode {
     type: NodeType.Identifier;
+    name: string;
+}
+
+export interface NamedColorNode extends CstNode {
+    type: NodeType.NamedColor;
     name: string;
 }
 

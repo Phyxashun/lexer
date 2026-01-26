@@ -1,6 +1,6 @@
 // ./index.ts
 
-import { inspect } from 'node:util';
+import { inspect, styleText } from 'node:util';
 import { inspectOptions } from './src/utils/InspectOptions';
 import { Char } from './src/char/Char';
 import { Lexer } from './src/lexer/Lexer';
@@ -43,30 +43,35 @@ export const logCST = (cst: ASTNode): void => {
 };
 
 export const test = () => {
-    console.log(`\n--- PARSER TESTING ---\n`);
+    let count = 0;
+    console.log(`\nTESTING\n`);
 
     tests.forEach(str => {
+        const test = styleText(['black', 'bgYellow'], `"${str}"`);
+        const nums = styleText(['blue'], `[${count}]`);
         try {
-            console.log(`\n--- Testing Input: "${str}" ---`);
+            console.log(`\nTest${nums}:\tCurrent Input: ${test}`);
 
             const chars = Char.fromString(str);
             // Optional: Output the Char[] to the console
-            logChars(chars);
+            //logChars(chars);
 
             const tokens: Token[] = new Lexer(chars, str).tokens;
             // Optional: Output the tokens to the console
-            logTokens(tokens);
+            //logTokens(tokens);
 
             const cst = new Parser(tokens, str).parse();
             // Optional: Output the CST to the console
             logCST(cst);
         } catch (e) {
-            console.error('--- PARSE FAILED ---');
+            console.error('\n*** PARSE FAILED ***');
             if (e instanceof LexerError || e instanceof ParseError) {
                 console.error(e.toString());
             } else {
                 console.error('An unknown error occurred:', e);
             }
+        } finally {
+            count++;
         }
     });
 };

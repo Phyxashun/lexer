@@ -11,6 +11,10 @@ export const CSSColorParserTable: TransitionTable = {
             action: actions.createIdentifier,
             nextState: ParserState.Complete,
         },
+        [TokenType.COLOR]: {
+            action: actions.createIdentifier,
+            nextState: ParserState.Complete,
+        },
         [TokenType.HEX_COLOR]: {
             action: actions.createHexColor,
             nextState: ParserState.Complete,

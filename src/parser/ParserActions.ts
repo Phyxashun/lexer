@@ -35,13 +35,18 @@ const currentFunc = (parser: Parser, token: Token): FunctionNode => {
 };
 
 export const createIdentifier: Action = (parser: Parser, token: Token) => {
-    const node: CstNode = {
-        type: NodeType.Identifier,
+    let type: NodeType;
+    if (token.type === TokenType.IDENTIFIER) {
+        type = NodeType.Identifier;
+    }
+    if (token.type === TokenType.COLOR) {
+        type = NodeType.NamedColor;
+    }
+    parser.cst = {
+        type,
         name: token.value,
         span: token.span,
     };
-    parser.cst = node;
-    console.log('INSIDE PARSER ACTIONS, NODE:', node);
 };
 
 export const createHexColor: Action = (parser: Parser, token: Token) => {
@@ -83,9 +88,9 @@ export const finishFunction: Action = (parser: Parser, token: Token) => {
     }
 };
 
-export const nodeHandlers: Partial<
-    Record<TokenType, (token: Token) => object>
-> = {
+type NodeHandlers = Partial<Record<TokenType, (token: Token) => object>>;
+
+export const nodeHandlers: NodeHandlers = {
     [TokenType.NUMBER]: token => ({
         type: NodeType.Number,
         value: token.value,
@@ -127,7 +132,7 @@ export const nodeHandlers: Partial<
     }),
 };
 
-const createNode = (token: Token, parser: Parser): CstNode => {
+export const createAndPushArgument: Action = (parser: Parser, token: Token) => {
     const nodeHandler = nodeHandlers[token.type];
 
     if (!nodeHandler) {
@@ -140,23 +145,14 @@ const createNode = (token: Token, parser: Parser): CstNode => {
         );
     }
 
-    return {
+    const node: CstNode = {
         span: token.span,
         ...nodeHandler(token),
     };
-};
 
-export const createAndPushArgument: Action = (parser: Parser, token: Token) => {
-    const node: CstNode = createNode(token, parser);
     currentFunc(parser, token).children.push(node);
 };
 
-/**
- * Description placeholder
- *
- * @param {Parser} parser
- * @param {Token} token
- */
 export const createAndPushOperator: Action = (parser: Parser, token: Token) => {
     const node: CstNode = {
         type: NodeType.Operator,
@@ -166,23 +162,10 @@ export const createAndPushOperator: Action = (parser: Parser, token: Token) => {
     currentFunc(parser, token).children.push(node);
 };
 
-/**
- * Description placeholder
- *
- * @param {Parser} _parser
- * @param {Token} _token
- */
 export const consumeToken: Action = (_parser: Parser, _token: Token) => {
     // This action does nothing but allow the state transition.
 };
 
-/**
- * Description placeholder
- *
- * @param {Parser} parser
- * @param {Token} token
- * @returns {never}
- */
 export const reportError: Action = (parser: Parser, token: Token) => {
     throw new Error(
         `Parse Error: Unexpected token '${token.value}' (${token.type}) in state ${ParserState[parser.state]}`,

@@ -60,7 +60,7 @@ export const DFA: TransitionTable = {
         [CharType.LParen]: State.SYNC,
         [CharType.RParen]: State.SYNC,
         [CharType.Comma]: State.SYNC,
-        [CharType.Slash]: State.SLASH,
+        [CharType.Slash]: State.SYNC,
         [CharType.Whitespace]: State.WS,
         [CharType.NewLine]: State.WS,
         [CharType.Percent]: State.SYNC,
@@ -154,9 +154,6 @@ export const ACCEPT: Partial<Record<State, TokenType>> = {
 
     // dimensions
     [State.Dimension]: TokenType.DIMENSION,
-
-    // slash
-    [State.Slash]: TokenType.SLASH,
 
     // hex
     [State.Hex3]: TokenType.HEX_COLOR,
