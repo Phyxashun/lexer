@@ -1,6 +1,6 @@
 // ./src/parser/Validation.ts
 
-import type { CstNode, FunctionNode } from './Node';
+import type { CstNode } from './Node';
 import { NodeType } from './Node';
 import { ParseError, ParseErrorCode } from './ParseError';
 
@@ -52,7 +52,7 @@ export const validationTable: Record<string, FunctionSpec> = {
  * It throws a ParseError if validation fails.
  */
 export function validate(node: CstNode, rawSource: string): void {
-    // ---------- Hex ----------
+    // Hex
     if (node.type === NodeType.HexColor) {
         const hex = node.value;
 
@@ -79,18 +79,18 @@ export function validate(node: CstNode, rawSource: string): void {
         return;
     }
 
-    // ---------- Non-functions ----------
+    // Non-functions
     if (node.type !== NodeType.Function) return;
 
     const spec = validationTable[node.name];
     if (!spec) return;
 
-    // ---------- Strip trivia ----------
+    // Strip trivia
     const meaningful = node.children.filter(
         n => n.type !== NodeType.WhiteSpace && n.type !== NodeType.Operator,
     );
 
-    // ---------- Split on slash ----------
+    // Split on slash
     const slashIndex = meaningful.findIndex(n => n.type === NodeType.Slash);
 
     let args: CstNode[];
@@ -123,7 +123,7 @@ export function validate(node: CstNode, rawSource: string): void {
         args = meaningful;
     }
 
-    // ---------- Arity ----------
+    //  Arity
     if (args.length !== spec.args.length) {
         throw new ParseError(
             `Function '${node.name}' expected ${spec.args.length} arguments, but received ${args.length}`,
@@ -134,7 +134,7 @@ export function validate(node: CstNode, rawSource: string): void {
         );
     }
 
-    // ---------- Type checking ----------
+    //  Type checking
     for (let i = 0; i < spec.args.length; i++) {
         if (!spec.args[i](args[i])) {
             throw new ParseError(
