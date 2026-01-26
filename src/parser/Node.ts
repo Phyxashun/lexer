@@ -1,16 +1,21 @@
 // ./src/parser/Node.ts
 
 import { Span } from '../lexer/Token';
+import { FUNCTIONS } from '../lexer/State';
 
 export enum NodeType {
     Function = 'Function',
     Identifier = 'Identifier',
     NamedColor = 'NamedColor',
+    RelativeColor = 'RelativeColor',
+    Channel = 'Channel',
+    Alpha = 'Alpha',
     HexColor = 'HexColor',
     Number = 'Number',
     Percentage = 'Percentage',
     Dimension = 'Dimension',
     Operator = 'Operator',
+    Slash = 'Slash',
     WhiteSpace = 'WhiteSpace',
 }
 
@@ -71,6 +76,14 @@ export interface OperatorNode extends CstNode {
 export interface WhiteSpaceNode extends CstNode {
     type: NodeType.WhiteSpace;
     value: ' ';
+}
+
+export interface RelativeColorNode extends CstNode {
+    type: NodeType.RelativeColor;
+    function: typeof FUNCTIONS;
+    source: CstNode;
+    channels: CstNode;
+    alpha?: CstNode;
 }
 
 export type ColorNode = IdentifierNode | HexColorNode | FunctionNode;

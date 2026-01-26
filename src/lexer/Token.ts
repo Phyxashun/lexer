@@ -6,6 +6,7 @@ export enum TokenType {
     FUNCTION = 'FUNCTION',
     KEYWORD = 'KEYWORD',
     COLOR = 'COLOR',
+    CHANNEL = 'CHANNEL',
     PROPERTY = 'PROPERTY',
     NUMBER = 'NUMBER',
     PERCENTAGE = 'PERCENTAGE',

@@ -70,11 +70,11 @@ export class Parser {
         const token = this.peek();
 
         switch (token.type) {
-            case TokenType.HEX_COLOR:
-                return this.HexColor();
-
             case TokenType.COLOR:
                 return this.NamedColor();
+
+            case TokenType.HEX_COLOR:
+                return this.HexColor();
 
             case TokenType.FUNCTION:
                 return this.Function();
@@ -153,6 +153,12 @@ export class Parser {
         const token = this.peek();
 
         switch (token.type) {
+            case TokenType.COLOR:
+                return this.NamedColor();
+
+            case TokenType.HEX_COLOR:
+                return this.HexColor();
+
             case TokenType.NUMBER:
                 return this.NumericLiteral();
 
@@ -164,6 +170,12 @@ export class Parser {
 
             case TokenType.IDENTIFIER:
                 return this.Identifier();
+
+            case TokenType.KEYWORD:
+                return this.Keyword();
+
+            case TokenType.CHANNEL:
+                return this.Channel();
 
             case TokenType.FUNCTION:
                 return this.Function();
@@ -234,6 +246,24 @@ export class Parser {
         const token = this.expect(TokenType.IDENTIFIER);
         return {
             type: NodeType.Identifier,
+            value: token.value,
+            span: token.span,
+        };
+    }
+
+    private Keyword(): CstNode {
+        const token = this.expect(TokenType.KEYWORD);
+        return {
+            type: NodeType.Keyword,
+            value: token.value,
+            span: token.span,
+        };
+    }
+
+    private Channel(): CstNode {
+        const token = this.expect(TokenType.CHANNEL);
+        return {
+            type: NodeType.Channel,
             value: token.value,
             span: token.span,
         };
