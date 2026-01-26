@@ -83,67 +83,71 @@ export const finishFunction: Action = (parser: Parser, token: Token) => {
     }
 };
 
-export const createAndPushArgument: Action = (parser: Parser, token: Token) => {
-    let node: CstNode;
-    const base = { span: token.span };
+export const nodeHandlers: Partial<
+    Record<TokenType, (token: Token) => object>
+> = {
+    [TokenType.NUMBER]: token => ({
+        type: NodeType.Number,
+        value: token.value,
+    }),
 
-    switch (token.type) {
-        case TokenType.NUMBER:
-            node = {
-                ...base,
-                type: NodeType.Number,
-                value: token.value,
-            };
+    [TokenType.PERCENTAGE]: token => ({
+        type: NodeType.Percentage,
+        value: token.value.replace(/%/g, ''),
+    }),
 
-        case TokenType.PERCENTAGE:
-            node = {
-                ...base,
-                type: NodeType.Percentage,
-                value: token.value.replace(/%/g, ''),
-            };
+    [TokenType.DIMENSION]: token => {
+        const [, value = '', unit = token.value] =
+            /^(-?\d*\.?\d+)(.*)$/.exec(token.value) ?? [];
+        return {
+            type: NodeType.Dimension,
+            value,
+            unit,
+        };
+    },
 
-        case TokenType.DIMENSION: {
-            const match = /^(-?\d*\.?\d+)(.*)$/.exec(token.value);
-            node = {
-                ...base,
-                type: NodeType.Dimension,
-                value: match ? match[1] : '',
-                unit: match ? match[2] : token.value,
-            };
-        }
+    [TokenType.IDENTIFIER]: token => ({
+        type: NodeType.Identifier,
+        name: token.value,
+    }),
 
-        case TokenType.IDENTIFIER:
-            node = {
-                ...base,
-                type: NodeType.Identifier,
-                name: token.value,
-            };
+    [TokenType.WHITESPACE]: () => ({
+        type: NodeType.WhiteSpace,
+        value: ' ',
+    }),
 
-        case TokenType.WHITESPACE:
-            node = {
-                ...base,
-                type: NodeType.WhiteSpace,
-                value: ' ',
-            };
+    [TokenType.SLASH]: token => ({
+        type: NodeType.Operator,
+        value: token.value as '/',
+    }),
 
-        case TokenType.SLASH:
-        case TokenType.COMMA:
-            node = {
-                ...base,
-                type: NodeType.Operator,
-                value: token.value as ',' | '/',
-            };
+    [TokenType.COMMA]: token => ({
+        type: NodeType.Operator,
+        value: token.value as ',',
+    }),
+};
 
-        default:
-            throw new ParseError(
-                `Cannot use token of type '${token.type}' as a function argument`,
-                ParseErrorCode.INVALID_ARGUMENT,
-                ParserState[parser.state],
-                token,
-                parser.rawSource,
-            );
+const createNode = (token: Token, parser: Parser): CstNode => {
+    const nodeHandler = nodeHandlers[token.type];
+
+    if (!nodeHandler) {
+        throw new ParseError(
+            `Cannot use token of type '${token.type}' as a function argument`,
+            ParseErrorCode.INVALID_ARGUMENT,
+            ParserState[parser.state],
+            token,
+            parser.rawSource,
+        );
     }
 
+    return {
+        span: token.span,
+        ...nodeHandler(token),
+    };
+};
+
+export const createAndPushArgument: Action = (parser: Parser, token: Token) => {
+    const node: CstNode = createNode(token, parser);
     currentFunc(parser, token).children.push(node);
 };
 

@@ -96,19 +96,6 @@ export class Lexer {
             return;
         }
 
-        if (
-            token.type === TokenType.ERROR &&
-            message === 'Unexpected character'
-        ) {
-            this.tokens.push(
-                this.createToken(
-                    TokenType.ERROR,
-                    'Unexpected character when lexing',
-                ),
-            );
-            //throw new LexerError(message, token, this.rawSource);
-        }
-
         if (this.buffer.length > 0 || type === TokenType.EOF) {
             this.tokens.push(token);
         }
