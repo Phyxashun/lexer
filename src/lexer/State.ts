@@ -55,6 +55,8 @@ export const DFA: TransitionTable = {
         [CharType.RParen]: State.SYNC,
         [CharType.Comma]: State.SYNC,
         [CharType.Slash]: State.SYNC,
+        [CharType.Plus]: State.SYNC,
+        [CharType.Star]: State.SYNC,
         [CharType.Whitespace]: State.WS,
         [CharType.NewLine]: State.WS,
         [CharType.Percent]: State.SYNC,
@@ -202,6 +204,11 @@ export const KEYWORDS = new Set([
     'currentcolor',
     'from',
     'transparent',
+    'e',
+    'pi',
+    'infinity',
+    '-infinity',
+    'NaN',
 ]);
 
 export const DIMENSIONS = new Set([

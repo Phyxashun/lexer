@@ -17,6 +17,9 @@ export enum TokenType {
     COMMA = 'COMMA',
     SLASH = 'SLASH',
     ERROR = 'ERROR',
+    PLUS = 'PLUS',
+    MINUS = 'MINUS',
+    STAR = 'STAR',
     EOF = 'EOF',
 }
 

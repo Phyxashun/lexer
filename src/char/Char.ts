@@ -73,9 +73,9 @@ export enum CharType {
 type CharSpecFn = (char: string) => boolean;
 
 export const CharSpec = new Map<CharType, CharSpecFn>([
-    [CharType.EOF, (char: string) => char === ''],
+    [CharType.EOF, (char: string) => char === EOF_STRING],
     [CharType.NewLine, (char: string) => /[\n\r\u2028\u2029]/u.test(char)],
-    [CharType.Whitespace, (char: string) => /[ \t\f\v]/.test(char)],
+    [CharType.Whitespace, (char: string) => /[ \t\f\v\u2020]/u.test(char)],
     [CharType.Hash, (char: string) => char === '#'],
     [CharType.Percent, (char: string) => char === '%'],
     [CharType.Slash, (char: string) => char === '/'],
@@ -117,6 +117,8 @@ export const CharSpec = new Map<CharType, CharSpecFn>([
     [CharType.Unicode, (char: string) => /\P{ASCII}/v.test(char)],
 ]);
 
+const EOF_STRING = '\u2404'; //'␄';
+const WS_STRING = '\u0020'; //' ';
 const TARGET_CHAR_DISPLAY_WIDTH = 8;
 const IS_UNDEFINED = -1;
 const IS_NULL = 0;
@@ -162,12 +164,10 @@ const NUMERAL_MAP: Record<string, number> = {
     '⑩': 10,
 } as const;
 
-export class Position {
-    constructor(
-        public index: number = IS_UNDEFINED,
-        public line: number = IS_UNDEFINED,
-        public column: number = IS_UNDEFINED,
-    ) {}
+export interface Position {
+    index: number;
+    line: number;
+    column: number;
 }
 
 export class IChar {
@@ -184,10 +184,14 @@ export class IChar {
     ) {
         this.type = type ?? CharType.Undefined;
         this._value = new Uint32Array(0);
-        this.value = value ?? ' ';
+        this.value = value ?? WS_STRING;
         this._isSubstring = isSubstring ?? false;
-        this.maxWidth = 0;
-        this.position = position ?? new Position();
+        this.maxWidth = IS_NULL;
+        this.position = position ?? {
+            index: IS_UNDEFINED,
+            line: IS_UNDEFINED,
+            column: IS_UNDEFINED,
+        };
     }
 
     public get isSubstring(): boolean {
@@ -223,9 +227,11 @@ export class Char extends IChar {
             position?: Position;
         } = {},
     ) {
-        if (character === '') {
-            super(CharType.EOF, '', false, options.position);
-            this.raw = '';
+        const isSubstring = options.isSubstring ?? false;
+
+        if (character === EOF_STRING) {
+            super(CharType.EOF, EOF_STRING, isSubstring, options.position);
+            this.raw = EOF_STRING;
             return;
         }
 
@@ -238,7 +244,7 @@ export class Char extends IChar {
                 'Input must be a single visual character (grapheme).',
             );
         }
-        const isSubstring = options.isSubstring ?? false;
+
         const position = options.position;
         const validatedChar = segments[0].segment;
         super(
@@ -258,10 +264,10 @@ export class Char extends IChar {
             return Array.from(value)
                 .map(cp => {
                     const code = cp.codePointAt(0);
-                    if (code === undefined) return '';
+                    if (code === undefined) return EOF_STRING;
                     return `\\u{${code.toString(16).toUpperCase()}}`;
                 })
-                .join('');
+                .join(EOF_STRING);
         }
         return value;
     }
@@ -303,9 +309,9 @@ export class Char extends IChar {
 
         // Construct the final padded string.
         const charPadded =
-            ' '.repeat(paddingStart) +
+            WS_STRING.repeat(paddingStart) +
             `'${charString}'` +
-            ' '.repeat(paddingEnd);
+            WS_STRING.repeat(paddingEnd);
         const CHAR = stylize(charPadded, 'date');
 
         // Handle the position info if it exists.
@@ -313,9 +319,15 @@ export class Char extends IChar {
             POS = '';
         if (this.isSubstring) {
             // Stylize the index, line and column numbers.
-            const idxPadStart = this.position.index.toFixed().padStart(2, ' ');
-            const linPadStart = this.position.line.toFixed().padStart(2, ' ');
-            const colPadStart = this.position.column.toFixed().padStart(2, ' ');
+            const idxPadStart = this.position.index
+                .toFixed()
+                .padStart(2, WS_STRING);
+            const linPadStart = this.position.line
+                .toFixed()
+                .padStart(2, WS_STRING);
+            const colPadStart = this.position.column
+                .toFixed()
+                .padStart(2, WS_STRING);
             const linColInfo = `[ ${linPadStart} : ${colPadStart} ]`;
             const posInfo = stylize(linColInfo, 'number');
             IDX = stylize(`[${idxPadStart}]`, 'number');
@@ -324,7 +336,7 @@ export class Char extends IChar {
 
         // Get the type and stylize it.
         const typeChar = this.type;
-        const typePadEnd = typeChar.padEnd(11, ' ');
+        const typePadEnd = typeChar.padEnd(11, WS_STRING);
         const typeInfo = stylize(typePadEnd, 'string');
         const charType = stylize(`CharType.`, 'special');
         const TYPE = `type: ${charType}${typeInfo}${POS}`;
@@ -426,11 +438,9 @@ export class Char extends IChar {
         const chars: Char[] = [];
         let maxWidth = 0;
 
-        const lines = str.split(/\r?\n/);
-        for (const line of lines) {
-            const currentLineWidth = Char.calculateVisualWidth(line);
-            if (currentLineWidth > maxWidth) maxWidth = currentLineWidth;
-        }
+        // Position tracking
+        let line = 1;
+        let column = 1;
 
         const segmenter = new Intl.Segmenter(undefined, {
             granularity: 'grapheme',
@@ -438,7 +448,8 @@ export class Char extends IChar {
         const segments = segmenter.segment(str);
 
         for (const { segment, index } of segments) {
-            const position = Char.calculatePosition(str, index);
+            // Create the position for the CURRENT character
+            const position = { index, line, column };
 
             chars.push(
                 new Char(segment, {
@@ -446,29 +457,8 @@ export class Char extends IChar {
                     position: position,
                 }),
             );
-        }
 
-        for (const c of chars) {
-            c.maxWidth = maxWidth;
-        }
-
-        return chars;
-    }
-
-    public static calculatePosition(
-        text: string,
-        targetIndex: number,
-    ): Position {
-        let line = 1;
-        let column = 1;
-
-        const segmenter = new Intl.Segmenter(undefined, {
-            granularity: 'grapheme',
-        });
-        const segments = segmenter.segment(text);
-
-        for (const { segment, index } of segments) {
-            if (index >= targetIndex) break;
+            // Update line/col for the NEXT character
             if (segment === '\n' || segment === '\r\n' || segment === '\r') {
                 line++;
                 column = 1;
@@ -477,7 +467,27 @@ export class Char extends IChar {
             }
         }
 
-        return new Position(targetIndex, line, column);
+        // Ensure the EOF Char is added at the final position
+        const eofPosition = { index: str.length, line, column };
+        chars.push(
+            new Char(EOF_STRING, {
+                isSubstring: true,
+                position: eofPosition,
+            }),
+        );
+
+        // Calculate maxWidth for visual alignment in logs
+        const lines = str.split(/\r?\n/);
+        for (const l of lines) {
+            const currentLineWidth = Char.calculateVisualWidth(l);
+            if (currentLineWidth > maxWidth) maxWidth = currentLineWidth;
+        }
+
+        for (const c of chars) {
+            c.maxWidth = maxWidth;
+        }
+
+        return chars;
     }
 
     public static calculateVisualWidth(str: string): number {

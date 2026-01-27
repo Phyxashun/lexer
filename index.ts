@@ -9,91 +9,101 @@ import { ParseError } from './src/parser/ParseError';
 import { LexerError } from './src/lexer/LexerError';
 import { CstNode } from './src/parser/Node';
 
-export const tests: string[] = [
-    // Basic Tests
-    'red',
-    '#ff00aa',
-    '#f0c',
-    'rgb(255, 100, 0)',
-    'rgba(0 100 200 / 0.5)',
-    'hsl(120deg, 100%, 50%)',
-    // Good error cases to test:
-    'rgb(255, 100,)', // Unexpected ')'
-    'lch(50% 100)', // Unclosed function
-    '#badcolor', // Invalid hex length
+export const config: Record<string, boolean> = {
+    getChars: true,
+    logChars: true,
+    getTokens: false,
+    logTokens: false,
+    getCST: false,
+    logCST: false,
+};
+
+export const tests: Map<number, string> = new Map<number, string>([
+    /* Basic Tests*/
+    [1, 'red'],
+    [2, '#ff00aa'],
+    [3, '#f0c'],
+    [4, 'rgb(255, 100, 0)'],
+    [5, 'rgba(0 100 200 / 0.5)'],
+    [6, 'hsl(120deg, 100%, 50%)'],
+
+    /* Good error cases to test */
+    [7, 'rgb(255, 100,)'], // Unexpected ')'
+    [8, 'lch(50% 100)'], // Unclosed function
+    [9, '#badcolor'], // Invalid hex length
 
     // Additional Tests from https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/color_value
     /* Named colors */
-    'rebeccapurple',
-    'aliceblue',
+    [10, 'rebeccapurple'],
+    [11, 'aliceblue'],
 
     /* RGB Hexadecimal */
-    '#f09',
-    '#ff0099',
+    [12, '#f09'],
+    [13, '#ff0099'],
 
     /* RGB (Red, Green, Blue) */
-    'rgb(255 0 153)',
-    'rgb(255 0 153 / 80%)',
+    [14, 'rgb(255 0 153)'],
+    [15, 'rgb(255 0 153 / 80%)'],
 
     /* HSL (Hue, Saturation, Lightness) */
-    'hsl(150 30% 60%)',
-    'hsl(150 30% 60% / 80%)',
+    [16, 'hsl(150 30% 60%)'],
+    [17, 'hsl(150 30% 60% / 80%)'],
 
     /* HWB (Hue, Whiteness, Blackness) */
-    'hwb(12 50% 0%)',
-    'hwb(194 0% 0% / 0.5)',
+    [18, 'hwb(12 50% 0%)'],
+    [19, 'hwb(194 0% 0% / 0.5)'],
 
     /* Lab (Lightness, A-axis, B-axis) */
-    'lab(50% 40 59.5)',
-    'lab(50% 40 59.5 / 0.5)',
+    [20, 'lab(50% 40 59.5)'],
+    [21, 'lab(50% 40 59.5 / 0.5)'],
 
     /* LCH (Lightness, Chroma, Hue) */
-    'lch(52.2% 72.2 50)',
-    'lch(52.2% 72.2 50 / 0.5)',
+    [21, 'lch(52.2% 72.2 50)'],
+    [22, 'lch(52.2% 72.2 50 / 0.5)'],
 
     /* Oklab (Lightness, A-axis, B-axis) */
-    'oklab(59% 0.1 0.1)',
-    'oklab(59% 0.1 0.1 / 0.5)',
+    [23, 'oklab(59% 0.1 0.1)'],
+    [24, 'oklab(59% 0.1 0.1 / 0.5)'],
 
     /* OkLCh (Lightness, Chroma, Hue) */
-    'oklch(60% 0.15 50)',
-    'oklch(60% 0.15 50 / 0.5)',
+    [25, 'oklch(60% 0.15 50)'],
+    [26, 'oklch(60% 0.15 50 / 0.5)'],
 
     /* Relative CSS colors */
     /* HSL hue change */
-    'hsl(from red 240deg s l)',
+    [27, 'hsl(from red 240deg s l)'],
     /* HWB alpha channel change */
-    'hwb(from green h w b / 0.5)',
+    [28, 'hwb(from green h w b / 0.5)'],
     /* LCH lightness change */
-    'lch(from blue calc(l + 20) c h)',
+    [29, 'lch(from blue calc(l + 20) c h)'],
 
     /* light-dark */
-    'light-dark(white, black)',
-    'light-dark(rgb(255 255 255), rgb(0 0 0))',
+    [30, 'light-dark(white, black)'],
+    [31, 'light-dark(rgb(255 255 255), rgb(0 0 0))'],
 
     // Relative Colors from https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Colors/Using_relative_colors
-    'red',
-    'rgb(255 0 0)',
+    [32, 'red'],
+    [33, 'rgb(255 0 0)'],
 
     // Valid Relative Color Strings
-    'rgb(from red 255 0 0)', // Absolute overrides
-    'rgb(from red 255 0 0 / 1)', // Absolute overrides with alpha
-    'rgb(from red 255 0 0 / 100%)', // Percentage alpha
+    [34, 'rgb(from red 255 0 0)'], // Absolute overrides
+    [35, 'rgb(from red 255 0 0 / 1)'], // Absolute overrides with alpha
+    [36, 'rgb(from red 255 0 0 / 100%)'], // Percentage alpha
 
-    'rgb(from red 255 g b)', // Mixed: absolute R, relative G and B
-    'rgb(from red r 0 0)', // Mixed: relative R, absolute G and B
-    'rgb(from red r g b / 1)', // Relative channels, absolute alpha
-    'rgb(from red r g b / 100%)', // Relative channels, absolute percentage alpha
+    [37, 'rgb(from red 255 g b)'], // Mixed: absolute R, relative G and B
+    [38, 'rgb(from red r 0 0)'], // Mixed: relative R, absolute G and B
+    [39, 'rgb(from red r g b / 1)'], // Relative channels, absolute alpha
+    [40, 'rgb(from red r g b / 100%)'], // Relative channels, absolute percentage alpha
 
-    'rgb(from red r g b)', // Identity (returns red)
-    'rgb(from red r g b / alpha)', // Identity including alpha
+    [41, 'rgb(from red r g b)'], // Identity (returns red)
+    [42, 'rgb(from red r g b / alpha)'], // Identity including alpha
 
     /* Interchangeable channels (since red's g and b are both 0) */
-    'rgb(from red r g g)', // Using green channel for blue
-    'rgb(from red r b b)', // Using blue channel for green
-    'rgb(from red 255 g g)', // Absolute R, green channel for blue
-    'rgb(from red 255 b b)', // Absolute R, blue channel for green
-];
+    [43, 'rgb(from red r g g)'], // Using green channel for blue
+    [44, 'rgb(from red r b b)'], // Using blue channel for green
+    [45, 'rgb(from red 255 g g)'], // Absolute R, green channel for blue
+    [46, 'rgb(from red 255 b b)'], // Absolute R, blue channel for green
+]);
 
 export const logChars = (chars: Char[]): void => {
     console.log('Chars:');
@@ -133,37 +143,51 @@ export const logCST = (cst: CstNode): void => {
 };
 
 export const test = () => {
-    let count = 0;
-    console.log(`\nTESTING\n`);
+    let chars: string = '';
+    let tokens: Token[] = [];
+    let cst: CstNode = {};
+    console.log(`\nTESTING`);
 
-    tests.forEach(str => {
-        const test = styleText(['black', 'bgYellow'], `"${str}"`);
-        const nums = styleText(['blue'], `[${count}]`);
+    for (const [testNumber, testStr] of tests) {
+        const testNum = styleText(['blue'], `[${testNumber}]`);
+        const test = styleText(['black', 'bgYellow'], `"${testStr}"`);
+
         try {
-            console.log(`\nTest${nums}:\tCurrent Input: ${test}`);
+            console.log(`\nTest${testNum}:\tCurrent Input: ${test}`);
 
-            const chars = Char.fromString(str);
-            // Optional: Output the Char[] to the console
-            //logChars(chars);
+            if (config.getChars) {
+                chars = Char.fromString(testStr);
+                if (config.logChars) logChars(chars);
+            } else {
+                continue;
+            }
 
-            const tokens: Token[] = new Lexer(chars, str).tokens;
-            // Optional: Output the tokens to the console
-            //logTokens(tokens);
+            if (config.getTokens) {
+                tokens = new Lexer(chars, testStr).tokens;
+                if (config.logTokens) logTokens(tokens);
+            } else {
+                continue;
+            }
 
-            const cst = new Parser(tokens, str).parse();
-            // Optional: Output the CST to the console
-            logCST(cst);
+            if (config.logChars) {
+                cst = new Parser(tokens, testStr).parse();
+                if (config.logCST) logCST(cst);
+            } else {
+                continue;
+            }
         } catch (e) {
-            console.error('\n*** PARSE FAILED ***');
-            if (e instanceof LexerError || e instanceof ParseError) {
+            if (e instanceof LexerError) {
+                console.error('\n*** LEXING FAILED ***');
+                console.error(e.toString());
+            } else if (e instanceof ParseError) {
+                console.error('\n*** PARSING FAILED ***');
                 console.error(e.toString());
             } else {
+                console.error('\n*** TESTING FAILED ***');
                 console.error('An unknown error occurred:', e);
             }
-        } finally {
-            count++;
         }
-    });
+    }
 };
 
 test();

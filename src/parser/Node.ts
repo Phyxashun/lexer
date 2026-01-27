@@ -6,6 +6,7 @@ import { FUNCTIONS } from '../lexer/State';
 export enum NodeType {
     Function = 'Function',
     Identifier = 'Identifier',
+    Keyword = 'Keyword',
     NamedColor = 'NamedColor',
     RelativeColor = 'RelativeColor',
     Channel = 'Channel',
@@ -39,6 +40,11 @@ export interface FunctionNode extends CstNode {
 
 export interface IdentifierNode extends CstNode {
     type: NodeType.Identifier;
+    name: string;
+}
+
+export interface KeywordNode extends CstNode {
+    type: NodeType.Keyword;
     name: string;
 }
 
@@ -89,10 +95,14 @@ export interface RelativeColorNode extends CstNode {
 export type ColorNode = IdentifierNode | HexColorNode | FunctionNode;
 
 export type ChildNode =
+    | FunctionNode
     | IdentifierNode
+    | KeywordNode
+    | NamedColorNode
+    | HexColorNode
     | NumberNode
     | PercentageNode
     | DimensionNode
-    | FunctionNode
     | OperatorNode
-    | WhiteSpaceNode;
+    | WhiteSpaceNode
+    | RelativeColorNode;

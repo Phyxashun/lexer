@@ -4,7 +4,7 @@ import { TokenType, type Token } from '../lexer/Token';
 import { ParseError, ParseErrorCode } from './ParseError';
 import type { CstNode, FunctionNode } from './Node';
 import { NodeType } from './Node';
-import { validate } from './Validation';
+import { validateColorFunction, validateHexColor } from './Validation';
 
 export class Parser {
     private pos = 0;
@@ -62,7 +62,6 @@ export class Parser {
 
     public parse(): CstNode {
         const node = this.parseColor();
-        validate(node, this.rawSource);
         return node;
     }
 
@@ -86,11 +85,12 @@ export class Parser {
 
     private parseHexColor(): HexColorNode {
         const token = this.expect(TokenType.HEX_COLOR);
-        return {
+        const node = {
             type: NodeType.HexColor,
             value: token.value.slice(1),
             span: token.span,
         };
+        return validateHexColor(node, this.rawSource);
     }
 
     private parseNamedColor(): NamedColorNode {
@@ -124,7 +124,7 @@ export class Parser {
             length: this.peekPrev().span.end - node.span.start,
         };
 
-        return node;
+        return validateColorFunction(node, this.rawSource);
     }
 
     private parseArguments(func: FunctionNode): void {
