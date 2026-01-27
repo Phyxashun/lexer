@@ -11,9 +11,9 @@ import { CstNode } from './src/parser/Node';
 
 export const config: Record<string, boolean> = {
     getChars: true,
-    logChars: true,
-    getTokens: false,
-    logTokens: false,
+    logChars: false,
+    getTokens: true,
+    logTokens: true,
     getCST: false,
     logCST: false,
 };
