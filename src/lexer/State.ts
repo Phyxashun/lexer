@@ -137,6 +137,9 @@ export const DFA: TransitionTable = {
         [CharType.Letter]: State.Hex8,
         [CharType.Number]: State.Hex8,
     },
+    [State.Hex8]: {
+        [CharType.EOF]: State.EOF,
+    },
 };
 
 export const ACCEPT: Partial<Record<State, TokenType>> = {

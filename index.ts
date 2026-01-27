@@ -9,13 +9,36 @@ import { ParseError } from './src/parser/ParseError';
 import { LexerError } from './src/lexer/LexerError';
 import { CstNode } from './src/parser/Node';
 
+const LAST_TEST = 15;
+
 export const config: Record<string, boolean> = {
     getChars: true,
-    logChars: false,
+    logChars: true,
     getTokens: true,
+    stripEOF: false,
     logTokens: true,
     getCST: false,
+    stripSpan: true,
     logCST: false,
+};
+
+export const stripEOF = (tokens: Token[]): Token[] => {
+    return tokens.filter(t => t.type !== 'EOF');
+};
+
+export const stripSpan = (node: CstNode | Token[]): CstNode | Token[] => {
+    if (Array.isArray(node)) {
+        return node.map(stripSpan);
+    }
+
+    if (node && typeof node === 'object') {
+        const { span, ...rest } = node;
+        return Object.fromEntries(
+            Object.entries(rest).map(([k, v]) => [k, stripSpan(v)]),
+        );
+    }
+
+    return node;
 };
 
 export const tests: Map<number, string> = new Map<number, string>([
@@ -114,31 +137,20 @@ export const logChars = (chars: Char[]): void => {
 
 export const logTokens = (tokens: Token[]): void => {
     console.log('Tokens:');
-    const filtered = tokens.filter(t => t.type !== 'EOF');
-    const formatted = inspect(filtered, inspectOptions);
+    const options = { ...inspectOptions, breakLength: 80 };
+    const strippedEOF = config.stripEOF ? stripEOF(tokens) : tokens;
+    const strippedSpan = config.stripSpan
+        ? stripSpan(strippedEOF)
+        : strippedEOF;
+    const formatted = inspect(strippedSpan, options);
     console.log(formatted);
-};
-
-export const stripSpan = (node: CstNode): CstNode => {
-    if (Array.isArray(node)) {
-        return node.map(stripSpan);
-    }
-
-    if (node && typeof node === 'object') {
-        const { span, ...rest } = node;
-        return Object.fromEntries(
-            Object.entries(rest).map(([k, v]) => [k, stripSpan(v)]),
-        );
-    }
-
-    return node;
 };
 
 export const logCST = (cst: CstNode): void => {
     console.log('Concrete Syntax Tree (CST):');
-    //console.dir(stripSpan(cst), { depth: null });
     const options = { ...inspectOptions, breakLength: 80 };
-    const formatted = inspect(stripSpan(cst), options);
+    const stripped = config.stripSpan ? stripSpan(cst) : cst;
+    const formatted = inspect(stripped, options);
     console.log(formatted);
 };
 
@@ -151,6 +163,8 @@ export const test = () => {
     for (const [testNumber, testStr] of tests) {
         const testNum = styleText(['blue'], `[${testNumber}]`);
         const test = styleText(['black', 'bgYellow'], `"${testStr}"`);
+
+        if (testNumber === LAST_TEST) break;
 
         try {
             console.log(`\nTest${testNum}:\tCurrent Input: ${test}`);

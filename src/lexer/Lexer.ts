@@ -110,27 +110,22 @@ export class Lexer {
             const nextState = DFA[this.state]?.[ch.type];
 
             if (nextState === undefined) {
-                // No transition found: Attempt to accept what we have
                 const accept = ACCEPT[this.state];
                 if (accept !== undefined) {
                     this.emit(accept, `Accepted at ${this.state}`);
-                    // Note: We do NOT advance here; we re-evaluate 'ch' in InitialState
                 } else if (
                     this.state >= State.Hex1 &&
                     this.state <= State.Hex8
                 ) {
                     this.emit(TokenType.ERROR, 'Invalid hex color');
                 } else {
-                    // Total failure: consume the "bad" char and move on
                     this.advance();
                     this.emit(TokenType.ERROR, 'Unexpected character');
                 }
             } else {
-                // Transition found!
                 this.state = nextState;
                 this.advance();
 
-                // Check if we hit a terminal state
                 if (this.state === State.EOF) {
                     this.emit(TokenType.EOF, 'End of input');
                     break;
@@ -144,8 +139,6 @@ export class Lexer {
                 }
             }
         }
-
-        // Safety check: if for some reason the loop ended without an EOF token, add it.
         const lastToken = this.tokens[this.tokens.length - 1];
         if (!lastToken || lastToken.type !== TokenType.EOF) {
             this.emit(TokenType.EOF, 'Manual EOF');
