@@ -1,8 +1,11 @@
 // ./src/lexer/Lexer.ts
 
+import { inspect, type InspectOptions, type InspectStylizeFn } from 'node:util';
 import { TokenType, type Token, type Span } from './Token';
 import { State, DFA, ACCEPT, foldIdentifierToken } from './State';
 import { Char } from '../char/Char';
+
+const SPACER = (n: number): string => ' '.repeat(n);
 
 const typesToSkip = new Set([]);
 
@@ -15,8 +18,9 @@ const charTokenMap: Record<string, TokenType> = {
 };
 
 export class Lexer {
-    private pos = 0;
+    public readonly [Symbol.toStringTag] = 'Token';
     public readonly tokens: Token[] = [];
+    private pos = 0;
 
     private start = 0;
     private state: State = State.InitialState;
@@ -28,6 +32,84 @@ export class Lexer {
     ) {
         this.tokenize();
     }
+
+    [inspect.custom] = (depth: number, options: InspectOptions): string => {
+        // Get the stylize function from inspect options for coloring.
+        const stylize = options.stylize as InspectStylizeFn;
+
+        // If recursion depth is exhausted, return a simple placeholder.
+        if (depth < 0) return stylize(this[Symbol.toStringTag], 'special');
+
+        let output = `TOKENS:\n`;
+
+        if (this.tokens.length === 0) {
+            output += `${SPACER(4)}// No tokens were generated.\n`;
+        } else {
+            let maxValueWidth = 0;
+            let maxTypeNameWidth = 0;
+
+            for (const token of this.tokens) {
+                const valueStr = `'${token.value.replace(/\n/g, '\\n')}'`;
+                if (valueStr.length > maxValueWidth) {
+                    maxValueWidth = valueStr.length + 1;
+                }
+
+                const typeName =
+                    TokenType[token.type] || `UNKNOWN(${token.type})`;
+                if (typeName.length > maxTypeNameWidth) {
+                    maxTypeNameWidth = typeName.length + 1;
+                }
+            }
+
+            for (let i = 0; i < this.tokens.length; i++) {
+                const token = this.tokens[i];
+                const TOKEN_CLASSNAME = stylize(
+                    this[Symbol.toStringTag],
+                    'special',
+                );
+
+                // Index
+                const idxPadStart = i.toFixed().padStart(3, ' ');
+                const IDX = stylize(`[${idxPadStart}]`, 'number');
+
+                // Value
+                const tokenValueString = `'${token.value.replace(/\n/g, '\\n')}'`;
+                const paddedValue = tokenValueString.padEnd(maxValueWidth, ' ');
+                const VAL = stylize(paddedValue, 'string');
+
+                // Type
+                const typeName =
+                    TokenType[token.type] || `UNKNOWN(${token.type})`;
+                const paddedTypeName = typeName.padEnd(maxTypeNameWidth, ' ');
+                const TYPE_INFO = stylize(paddedTypeName, 'string');
+                const TOKEN_TYPE_LABEL = stylize('TokenType.', 'special');
+                const TYPE = `type: ${TOKEN_TYPE_LABEL}${TYPE_INFO}`;
+
+                output += `${SPACER(2)}${TOKEN_CLASSNAME}${IDX}: ${VAL}, ${TYPE}`;
+
+                // Position
+                if (token.span) {
+                    const span = token.span;
+                    const start = span.start.toFixed().padStart(2, ' ');
+                    const end = span.end.toFixed().padStart(2, ' ');
+                    const line = span.line.toFixed().padStart(2, ' ');
+                    const column = span.column.toFixed().padStart(2, ' ');
+                    const length = span.length.toFixed().padStart(3, ' ');
+                    const spanInfo = `[S:${start}, E:${end}, L:${line}, C:${column}, len:${length}]`;
+                    output += `, span: ${stylize(spanInfo, 'number')}`;
+                }
+
+                // Append the message if it exists.
+                if (token.message) {
+                    output += `, msg: '${stylize(token.message, 'regexp')}'`;
+                }
+                output += '\n';
+            }
+        }
+        //output += `  ]\n`;
+        //output += `}`;
+        return output;
+    };
 
     private isEOF(): boolean {
         return this.pos >= this.chars.length;

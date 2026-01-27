@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 /// <reference types='./logger.d.ts' />
+
 // ./src/logger/Logger.ts
 
 import { styleText } from 'node:util';
@@ -7,29 +8,16 @@ import figlet from 'figlet';
 import standard from 'figlet/fonts/Standard';
 
 /**
- * Description placeholder
- *
- * @type {100}
+ * @description CONSTANTS.
  */
 export const MAX_WIDTH = 100;
-/**
- * Description placeholder
- *
- * @type {4}
- */
 export const TAB_WIDTH = 4;
-/**
- * Description placeholder
- *
- * @type {" "}
- */
 export const SPACE = ' ';
-/**
- * Description placeholder
- *
- * @type {"Standard"}
- */
 export const FIGLET_FONT = 'Standard';
+
+/**
+ * @description Default font to use with figlet.
+ */
 figlet.parseFont(FIGLET_FONT, standard);
 
 /**
@@ -130,7 +118,7 @@ export enum LineType {
 }
 
 /**
- * @enum BoxStyle
+ * @enum BoxType
  * @description Enum for different box styles.
  */
 export enum BoxType {
@@ -148,7 +136,7 @@ export enum BoxType {
 }
 
 /**
- * @type BoxPartKeys
+ * @type BoxPart
  * @description Type defining the keys for box parts.
  */
 export enum BoxPart {
@@ -322,11 +310,19 @@ export const Spacer = (
  * @requires spacer - Function that return a string for spacing.
  */
 export const CenterText = (text: string, width: number = MAX_WIDTH): string => {
-    // Remove any existing styling for accurate length calculation
     const ansiRegex = new RegExp('\\x1b\\[[0-9;]*m', 'g');
     const unstyledText = text.replace(ansiRegex, '');
     const padding = Math.max(0, Math.floor((width - unstyledText.length) / 2));
     return `${Spacer(padding)}${text}`;
+};
+
+/**
+ * @function CenteredText
+ * @description Outputs centered text to the console.
+ * @param {string} text - The text to center and print.
+ */
+export const CenteredText = (text: string): void => {
+    console.log(CenterText(text));
 };
 
 /**
@@ -346,7 +342,6 @@ export const CenteredFiglet = (
         width: width,
         whitespaceBreak: true,
     });
-
     return rawFiglet
         .split('\n')
         .map(line => CenterText(line, width))
@@ -360,9 +355,6 @@ export const CenteredFiglet = (
  * @returns {string}
  */
 export const PrintLine = (options: PrintLineOptions = {}): string => {
-    /**
-     * @description Default options object for the printLine function.
-     */
     const defaultOptions: PrintLineOptions = {
         preNewLine: false,
         postNewLine: false,
@@ -371,15 +363,10 @@ export const PrintLine = (options: PrintLineOptions = {}): string => {
         color: [Color.gray, Style.bold],
         textAlign: Align.center,
     } as const;
-
     const themeOptions = options.theme
         ? (Themes as unknown)[options.theme]
         : {};
-    const mergedOptions = {
-        ...defaultOptions,
-        ...themeOptions,
-        ...options,
-    };
+    const mergedOptions = { ...defaultOptions, ...themeOptions, ...options };
     const {
         width,
         preNewLine,
@@ -392,8 +379,7 @@ export const PrintLine = (options: PrintLineOptions = {}): string => {
         text,
         textColor,
         textAlign,
-    }: PrintLineOptions = mergedOptions;
-
+    } = mergedOptions;
     const colorStyles = color ? (Array.isArray(color) ? color : [color]) : [];
     const bgColorStyles = bgColor
         ? Array.isArray(bgColor)
@@ -401,7 +387,6 @@ export const PrintLine = (options: PrintLineOptions = {}): string => {
             : [bgColor]
         : [];
     const otherStyles = styles ?? [];
-
     const lineStyles = [...colorStyles, ...bgColorStyles, ...otherStyles];
     const textStyles = textColor
         ? Array.isArray(textColor)
@@ -410,12 +395,11 @@ export const PrintLine = (options: PrintLineOptions = {}): string => {
         : lineStyles;
     const pre = preNewLine ? '\n' : '';
     const post = postNewLine ? '\n' : '';
-    let finalOutput: string;
 
+    let finalOutput: string;
     if (gradient) {
         const [startColor, endColor] = gradient;
         const halfWidth = Math.floor(width / 2);
-
         const startSegment = styleText(
             [startColor],
             lineType?.repeat(halfWidth),
@@ -424,30 +408,16 @@ export const PrintLine = (options: PrintLineOptions = {}): string => {
             [endColor],
             lineType?.repeat(width - halfWidth),
         );
-
-        const styledDivider = startSegment + endSegment;
-
-        const result = `${pre}${styledDivider}${post}`;
-        console.log(result);
-        return result;
-    }
-
-    if (!text) {
-        // Simple case: No text, just style the whole line as before.
+        finalOutput = startSegment + endSegment;
+    } else if (!text) {
         finalOutput = styleText(lineStyles, lineType?.repeat(width));
     } else {
-        // Advanced case: Text exists, so build the line in pieces.
-        const paddedText = ` ${text} `; // Add padding
-
-        // Style the text separately
+        const paddedText = ` ${text} `;
         const styledText = styleText(textStyles, paddedText);
-
         const lineCharCount = width - paddedText.length;
         if (lineCharCount < 0) {
-            // If the text is too long, just print the styled text.
             finalOutput = styledText;
         } else {
-            // Otherwise, calculate and style the line segments.
             switch (textAlign) {
                 case 'left': {
                     const rightLine = styleText(
@@ -483,8 +453,6 @@ export const PrintLine = (options: PrintLineOptions = {}): string => {
             }
         }
     }
-
-    // 5. Log the final constructed string
     const result = `${pre}${finalOutput}${post}`;
     console.log(result);
     return result;
@@ -501,51 +469,40 @@ export const BoxText = (
     text: string | string[],
     options: BoxTextOptions = {},
 ): void => {
-    /**
-     * @description Default options object for the printLine function.
-     */
     const defaultOptions: BoxTextOptions = {
         width: Width.tight,
         preNewLine: false,
         postNewLine: false,
         boxType: BoxType.single,
         boxAlign: Align.center,
+        textAlign: 'center',
         color: [Color.gray, Style.bold],
         textColor: Color.white,
     } as const;
-
     const themeOptions = options.theme
         ? (Themes as unknown)[options.theme]
         : {};
-    const mergedOptions = {
-        ...defaultOptions,
-        ...themeOptions,
-        ...options,
-    };
+    const mergedOptions = { ...defaultOptions, ...themeOptions, ...options };
     const {
         width,
         preNewLine,
         postNewLine,
         boxType,
         boxAlign,
+        textAlign,
         color,
         bgColor,
         textColor,
         textBgColor,
         styles,
-    }: BoxTextOptions = mergedOptions;
+    } = mergedOptions;
 
     const boxChars = BoxStyles[boxType] as BoxParts;
-
-    // Prepare Separate Styles for Box and Text
     const boxFinalStyles = [
         ...(color ? (Array.isArray(color) ? color : [color]) : []),
         ...(bgColor ? (Array.isArray(bgColor) ? bgColor : [bgColor]) : []),
-
         ...(styles ?? []),
     ];
-
-    // If text styles aren't provided, they default to the box styles
     const textFinalStyles = [
         ...(textColor
             ? Array.isArray(textColor)
@@ -557,85 +514,86 @@ export const BoxText = (
                 ? textBgColor
                 : [textBgColor]
             : []),
-
-        ...(styles ?? []),
     ];
 
-    // Calculate Content Width and Wrap Text
+    const stripAnsi = (str: string): string =>
+        str.replace(/\x1b\[[0-9;]*m/g, '');
+    const expandTabs = (str: string, tabWidth: number = 8): string => {
+        if (str.indexOf('\t') === -1) return str;
+        let output = '';
+        str.split('\t').forEach((part, i, arr) => {
+            output += part;
+            if (i < arr.length - 1) {
+                const spaces = tabWidth - (stripAnsi(output).length % tabWidth);
+                output += ' '.repeat(spaces > 0 ? spaces : tabWidth);
+            }
+        });
+        return output;
+    };
+
+    const initialText = expandTabs(
+        Array.isArray(text) ? text.join('\n') : text,
+    );
     let contentWidth: number;
     let textLines: string[];
 
-    // Add this helper inside BoxText, right after the options destructuring
-    const stripAnsi = (str: string): string =>
-        str.replace(/\x1b\[[0-9;]*m/g, '');
-
-    if (Array.isArray(text)) {
-        textLines = text;
+    if (width === 'max') {
+        contentWidth = MAX_WIDTH - 4;
+    } else if (typeof width === 'number') {
+        contentWidth = width - 4;
+    } else {
+        // 'tight'
         contentWidth = Math.max(
-            ...textLines.map(line => stripAnsi(line).length),
+            ...initialText.split('\n').map(line => stripAnsi(line).length),
         );
+    }
 
-        // If a fixed width is requested, we use it instead of the longest line
-        if (typeof width === 'number') {
-            contentWidth = width - 4;
-        } else if (width === Width.max) {
-            contentWidth = MAX_WIDTH - 4;
+    if (width !== 'tight') {
+        const potentialLines = initialText.split('\n');
+        textLines = [];
+        for (const line of potentialLines) {
+            if (stripAnsi(line).length > contentWidth) {
+                const words = line.split(' ');
+                const newLines = words.reduce<string[]>((acc, word) => {
+                    if (acc.length === 0) return [word];
+                    const last = acc[acc.length - 1];
+                    if (
+                        stripAnsi(last).length + stripAnsi(word).length + 1 >
+                        contentWidth
+                    ) {
+                        acc.push(word);
+                    } else {
+                        acc[acc.length - 1] = last + ' ' + word;
+                    }
+                    return acc;
+                }, []);
+                textLines.push(...newLines);
+            } else {
+                textLines.push(line);
+            }
         }
     } else {
-        if (width === 'max') {
-            contentWidth = MAX_WIDTH - 4;
-        } else if (typeof width === 'number') {
-            if (width <= 4)
-                throw new Error('Custom width must be greater than 4.');
-            contentWidth = width - 4;
-        } else {
-            textLines = text.split('\n');
-            contentWidth = Math.max(...textLines.map(line => line.length));
-        }
-
-        if (width !== 'tight') {
-            const words: string[] = text.split(/\s+/);
-            textLines = words.reduce<string[]>(
-                (lines: string[], word: string) => {
-                    if (lines.length === 0) return [word];
-                    const lastLine: number = lines[lines.length - 1];
-                    const lastLineLength: number = lastLine.length;
-                    const wordLength: number = word.length;
-                    if (lastLineLength + wordLength + 1 > contentWidth) {
-                        lines.push(word);
-                    } else {
-                        lines[lines.length - 1] =
-                            lastLine.toString() + ' ' + word;
-                    }
-                    return lines;
-                },
-                [],
-            );
-        } else {
-            textLines = text.split('\n');
-        }
+        textLines = initialText.split('\n');
     }
 
-    // Calculate Outer Alignment Padding
-    const fullBoxWidth = contentWidth + 4; // Border(1) + Space(1) + Content + Space(1) + Border(1)
-    let leftPaddingAmount = 0;
-
+    const fullBoxWidth = contentWidth + 4;
+    let outerPadding = '';
     if (boxAlign === 'center') {
-        leftPaddingAmount = Math.max(
-            0,
-            Math.floor((MAX_WIDTH - fullBoxWidth) / 2),
-        );
+        outerPadding = ' '.repeat(Math.floor((MAX_WIDTH - fullBoxWidth) / 2));
     } else if (boxAlign === 'right') {
-        leftPaddingAmount = Math.max(0, MAX_WIDTH - fullBoxWidth);
+        outerPadding = ' '.repeat(MAX_WIDTH - fullBoxWidth);
     }
 
-    const outerPadding = ' '.repeat(leftPaddingAmount);
-
-    // Build Box Components
-    const centerAlign = (str: string, width: number): string => {
-        const padding = Math.floor((width - str.length) / 2);
+    const leftAlign = (s: string, w: number) =>
+        s + ' '.repeat(Math.max(0, w - stripAnsi(s).length));
+    const rightAlign = (s: string, w: number) =>
+        ' '.repeat(Math.max(0, w - stripAnsi(s).length)) + s;
+    const centerAlign = (s: string, w: number) => {
+        const len = stripAnsi(s).length;
+        const left = Math.floor((w - len) / 2);
+        const right = w - len - left;
         return (
-            ' '.repeat(padding) + str + ' '.repeat(width - str.length - padding)
+            ' '.repeat(Math.max(0, left)) + s + ' '.repeat(Math.max(0, right))
         );
     };
 
@@ -643,20 +601,27 @@ export const BoxText = (
         boxFinalStyles,
         boxChars.tl + boxChars.t.repeat(contentWidth + 2) + boxChars.tr,
     );
-
     const styledBottom = styleText(
         boxFinalStyles,
         boxChars.bl + boxChars.b.repeat(contentWidth + 2) + boxChars.br,
     );
-
     const styledLeftBorder = styleText(boxFinalStyles, boxChars.l + ' ');
-
     const styledRightBorder = styleText(boxFinalStyles, ' ' + boxChars.r);
 
-    // Assemble lines with outer padding
     const styledContentLines = textLines.map(line => {
-        const centeredText = centerAlign(line, contentWidth);
-        const styledText = styleText(textFinalStyles, centeredText);
+        let alignedText: string;
+        switch (textAlign) {
+            case 'left':
+                alignedText = leftAlign(line, contentWidth);
+                break;
+            case 'right':
+                alignedText = rightAlign(line, contentWidth);
+                break;
+            default:
+                alignedText = centerAlign(line, contentWidth);
+                break;
+        }
+        const styledText = styleText(textFinalStyles, alignedText);
         return outerPadding + styledLeftBorder + styledText + styledRightBorder;
     });
 
@@ -665,17 +630,7 @@ export const BoxText = (
         ...styledContentLines,
         outerPadding + styledBottom,
     ].join('\n');
-
     const pre = preNewLine ? '\n' : '';
     const post = postNewLine ? '\n' : '';
     console.log(`${pre}${fullBoxString}${post}`);
-};
-
-/**
- * @function CenteredText
- * @description Outputs centered text to the console.
- * @param {string} text - The text to center and print.
- */
-export const CenteredText = (text: string): void => {
-    console.log(CenterText(text));
 };

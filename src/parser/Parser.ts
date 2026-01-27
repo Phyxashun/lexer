@@ -1,18 +1,164 @@
 // ./src/parser/Parser.ts
 
+import { inspect, type InspectOptions, type InspectStylizeFn } from 'node:util';
 import { TokenType, type Token } from '../lexer/Token';
 import { ParseError, ParseErrorCode } from './ParseError';
 import type { CstNode, FunctionNode } from './Node';
 import { NodeType } from './Node';
 import { validateColorFunction, validateHexColor } from './Validation';
 
+const SPACER = (n: number): string => ' '.repeat(n);
+
 export class Parser {
+    public readonly [Symbol.toStringTag] = 'Parser';
+    public readonly node: CstNode = {};
     private pos = 0;
 
     constructor(
         public readonly tokens: Token[],
         public readonly rawSource?: string,
     ) {}
+
+    [inspect.custom] = (depth: number, options: InspectOptions): string => {
+        const stylize = options.stylize as InspectStylizeFn;
+
+        if (depth < 0 || !this.node || Object.keys(this.node).length === 0) {
+            return stylize(
+                this.node ? this[Symbol.toStringTag] : '// Empty Parse Result',
+                'special',
+            );
+        }
+
+        // This object will store the maximum widths found in the tree.
+        const widths = {
+            maxTypeWidth: 0,
+            maxPropsWidth: 0,
+        };
+
+        /**
+         * Recursively traverses the CST to calculate the maximum width needed
+         * for the type and properties columns.
+         * @param node The current node in the tree.
+         */
+        const calculateNodeWidths = (node: CstNode): void => {
+            if (!node) return;
+
+            // Calculate width of the NodeType string
+            const typeString = NodeType[node.type] || NodeType.Error;
+            const nodeTypeString = '[NodeType.' + typeString + ']';
+            widths.maxTypeWidth = Math.max(
+                widths.maxTypeWidth,
+                nodeTypeString.length,
+            );
+
+            // Calculate width of the properties string (e.g., "name: 'rgb'")
+            const props = [];
+            if ('name' in node) props.push(`name: '${node.name}'`);
+            if ('value' in node) {
+                const displayValue =
+                    node.type === NodeType.WhiteSpace ? '\u0020' : node.value;
+                props.push(`value: '${String(displayValue)}'`);
+            }
+            if ('unit' in node) props.push(`unit: '${node.unit}'`);
+            const propsString = props.join(', ');
+            widths.maxPropsWidth = Math.max(
+                widths.maxPropsWidth,
+                propsString.length,
+            );
+
+            // Recurse into children
+            if ('children' in node && node.children) {
+                for (const child of node.children) {
+                    calculateNodeWidths(child);
+                }
+            }
+        };
+
+        /**
+         * Recursively traverses the CST to render a formatted string representation,
+         * using the pre-calculated maximum widths for padding.
+         * @param node The current node to render.
+         * @param indent The indentation string for the current level.
+         * @returns A string representation of the node tree.
+         */
+        const renderNode = (node: CstNode, indent: string): string => {
+            let output = indent;
+            const childIndent = indent + indent;
+
+            // NodeType
+            const typeString = NodeType[node.type] || NodeType.Error;
+            const nodeTypeString = ('[NodeType.' + typeString + ']').padEnd(
+                widths.maxTypeWidth,
+                SPACER(1),
+            );
+            const styledType = stylize(nodeTypeString, 'special');
+            output += `${styledType} : `;
+
+            // Properties
+            const props = [];
+            if ('name' in node)
+                props.push(`name: '${stylize(node.name, 'string')}'`);
+
+            if ('value' in node) {
+                const value =
+                    node.type === NodeType.WhiteSpace ? '\u0020' : node.value;
+                const displayValue = value.toString();
+                props.push(`value: '${stylize(displayValue, 'string')}'`);
+            }
+
+            if ('unit' in node)
+                props.push(`unit: '${stylize(node.unit, 'string')}'`);
+
+            const propsString = props.join(', ');
+            const helperRegex = new RegExp(/\u001b\[\d+m/, 'g');
+            const visualLength = propsString.replace(helperRegex, '').length;
+            const maxProp = widths.maxPropsWidth - visualLength;
+            const maxPropLength = Math.max(0, maxProp);
+            const propsPadding = SPACER(maxPropLength);
+            output += `${propsString}${propsPadding}`;
+
+            // Add a comma if there were properties
+            if (props.length > 0) output += ', ';
+
+            // Span
+            if (node.span) {
+                const span = node.span;
+                const start = span.start.toFixed().padStart(2, ' ');
+                const end = span.end.toFixed().padStart(2, ' ');
+                const line = span.line.toFixed().padStart(2, ' ');
+                const column = span.column.toFixed().padStart(2, ' ');
+                const length = span.length.toFixed().padStart(3, ' ');
+                const spanInfo = `[S:${start}, E:${end}, L:${line}, C:${column}, len:${length}]`;
+                output += `span: ${stylize(spanInfo, 'number')}`;
+            }
+            output += '\n';
+
+            // Recurse into children
+            if (
+                'children' in node &&
+                node.children &&
+                node.children.length > 0
+            ) {
+                output += `${childIndent}CHILDREN: [\n`;
+                for (const child of node.children) {
+                    output += renderNode(child, childIndent + '  ');
+                }
+                output += `${childIndent}]\n`;
+            }
+            return output;
+        };
+
+        // --- Execution ---
+        // First pass: Calculate all widths
+        calculateNodeWidths(this.node);
+
+        // Second pass: Render the tree with alignment
+        const treeOutput = renderNode(this.node, SPACER(2));
+
+        const name = this.constructor.name.toUpperCase();
+        const className = stylize(name + ': ', 'special');
+        return `${className} {\n${treeOutput}}`;
+    };
 
     private isEOF(): boolean {
         return (
@@ -61,8 +207,8 @@ export class Parser {
     }
 
     public parse(): CstNode {
-        const node = this.parseColor();
-        return node;
+        this.node = this.parseColor();
+        return this.node;
     }
 
     private parseColor(): CstNode {

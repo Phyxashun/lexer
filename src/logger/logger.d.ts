@@ -91,23 +91,8 @@ type BoxParts = { [k in keyof typeof BoxPart]: string };
  * @property {(StyleType)[]} [styles] - Optional styles associated with the theme.
  */
 interface Theme {
-    /**
-     * Description placeholder
-     *
-     * @type {(InspectColor | InspectColor[])}
-     */
     color: InspectColor | InspectColor[];
-    /**
-     * Description placeholder
-     *
-     * @type {LineType}
-     */
     line: LineType;
-    /**
-     * Description placeholder
-     *
-     * @type {?StyleType[]}
-     */
     styles?: StyleType[];
 }
 
@@ -127,81 +112,21 @@ interface Theme {
  */
 interface PrintLineOptions {
     // Alignment options
-    /**
-     * Description placeholder
-     *
-     * @type {?number}
-     */
     width?: number;
-    /**
-     * Description placeholder
-     *
-     * @type {?boolean}
-     */
     preNewLine?: boolean;
-    /**
-     * Description placeholder
-     *
-     * @type {?boolean}
-     */
     postNewLine?: boolean;
 
     // Line options
-    /**
-     * Description placeholder
-     *
-     * @type {?LineType}
-     */
     lineType?: LineType;
-    /**
-     * Description placeholder
-     *
-     * @type {?keyof typeof Themes}
-     */
     theme?: keyof typeof Themes;
-    /**
-     * Description placeholder
-     *
-     * @type {?(InspectColor | InspectColor[])}
-     */
     color?: InspectColor | InspectColor[];
-    /**
-     * Description placeholder
-     *
-     * @type {?(InspectColor | InspectColor[])}
-     */
     bgColor?: InspectColor | InspectColor[];
-    /**
-     * Description placeholder
-     *
-     * @type {?[InspectColor, InspectColor]}
-     */
     gradient?: [InspectColor, InspectColor];
-    /**
-     * Description placeholder
-     *
-     * @type {?(StyleType | StyleType[])}
-     */
     styles?: StyleType | StyleType[];
 
     // Text options
-    /**
-     * Description placeholder
-     *
-     * @type {?string}
-     */
     text?: string;
-    /**
-     * Description placeholder
-     *
-     * @type {?AlignType}
-     */
     textAlign?: AlignType;
-    /**
-     * Description placeholder
-     *
-     * @type {?(InspectColor | InspectColor[])}
-     */
     textColor?: InspectColor | InspectColor[];
 }
 
@@ -226,79 +151,26 @@ type BoxWidth = 'tight' | 'max' | number;
  * @property {InspectColor | InspectColor[]} color - The default foreground color of the box.
  * @property {InspectColor | InspectColor[]} bgColor - The default backgound color of the box.
  * @property {StyleType | StyleType[]} styles - The styles of the box.
+ * @property {AlignType} textAlign - The alignment of text within the box.
  * @property {InspectColor | InspectColor[]} textColor - The text color inside the box.
  * @property {InspectColor | InspectColor[]} textBgColor - The text background color inside the box.
  */
 interface BoxTextOptions {
     // Alignment options
-    /**
-     * Description placeholder
-     *
-     * @type {?BoxWidth}
-     */
     width?: BoxWidth;
-    /**
-     * Description placeholder
-     *
-     * @type {?boolean}
-     */
     preNewLine?: boolean;
-    /**
-     * Description placeholder
-     *
-     * @type {?boolean}
-     */
     postNewLine?: boolean;
 
     // Box options
-    /**
-     * Description placeholder
-     *
-     * @type {?BoxType}
-     */
     boxType?: BoxType;
-    /**
-     * Description placeholder
-     *
-     * @type {?AlignType}
-     */
     boxAlign?: AlignType;
-    /**
-     * Description placeholder
-     *
-     * @type {?keyof typeof Themes}
-     */
     theme?: keyof typeof Themes;
-    /**
-     * Description placeholder
-     *
-     * @type {?(InspectColor | InspectColor[])}
-     */
     color?: InspectColor | InspectColor[];
-    /**
-     * Description placeholder
-     *
-     * @type {?(InspectColor | InspectColor[])}
-     */
     bgColor?: InspectColor | InspectColor[];
-    /**
-     * Description placeholder
-     *
-     * @type {?(StyleType | StyleType[])}
-     */
     styles?: StyleType | StyleType[];
 
     // Text options
-    /**
-     * Description placeholder
-     *
-     * @type {?(InspectColor | InspectColor[])}
-     */
+    textAlign?: AlignType;
     textColor?: InspectColor | InspectColor[];
-    /**
-     * Description placeholder
-     *
-     * @type {?(InspectColor | InspectColor[])}
-     */
     textBgColor?: InspectColor | InspectColor[];
 }

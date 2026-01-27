@@ -28,6 +28,7 @@ export interface Span {
     end: number; // Absolute index end
     line: number; // Line number (1-based)
     column: number; // Column number (1-based)
+    length: number; // Total length of the span
 }
 
 export interface Token {

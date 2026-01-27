@@ -20,6 +20,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { globSync } from 'glob';
 import {
+    JobDefinition,
+    ConsolidationJob,
+    Configuration,
+    FinalSummaryOptions,
+} from './consolidate';
+import {
     LineType,
     BoxType,
     Spacer,
@@ -30,46 +36,17 @@ import {
 } from '../logger/logger';
 
 /******************************************************************************************************
- *
  * CONSTANTS
- *
  ******************************************************************************************************/
 const OUTPUT_DIR = './ALL';
-/**
- * Description placeholder
- *
- * @type {string}
- */
 const TEXT_OUTPUT_DIR = OUTPUT_DIR + '/txt/';
-/**
- * Description placeholder
- *
- * @type {string}
- */
 const TS_OUTPUT_DIR = OUTPUT_DIR + '/ts/';
-/**
- * Description placeholder
- *
- * @type {30}
- */
 const START_END_SPACER = 30;
-/**
- * Description placeholder
- *
- * @type {2}
- */
 const START_END_NEWLINE = 2;
-/**
- * Description placeholder
- *
- * @type {100}
- */
 const FILE_DIVIDER_WIDTH = 100;
 
 /******************************************************************************************************
- *
  * TYPES
- *
  ******************************************************************************************************/
 /**
  * @interface JobDefinition
@@ -79,23 +56,8 @@ const FILE_DIVIDER_WIDTH = 100;
  * @property {string[]} patterns - An array of glob patterns to find files for this job.
  */
 interface JobDefinition {
-    /**
-     * Description placeholder
-     *
-     * @type {string}
-     */
     name: string;
-    /**
-     * Description placeholder
-     *
-     * @type {?string}
-     */
     description?: string;
-    /**
-     * Description placeholder
-     *
-     * @type {string[]}
-     */
     patterns: string[];
 }
 
@@ -106,11 +68,6 @@ interface JobDefinition {
  * @property {string} outputFile - The path to the file where content will be consolidated.
  */
 interface ConsolidationJob extends JobDefinition {
-    /**
-     * Description placeholder
-     *
-     * @type {string}
-     */
     outputFile: string;
 }
 
@@ -121,23 +78,8 @@ interface ConsolidationJob extends JobDefinition {
  * @typedef {Configuration}
  */
 interface Configuration {
-    /**
-     * Description placeholder
-     *
-     * @type {(outputDir: string, extension: string) => ConsolidationJob[]}
-     */
     GenerateJobs: (outputDir: string, extension: string) => ConsolidationJob[];
-    /**
-     * Description placeholder
-     *
-     * @type {ConsolidationJob[]}
-     */
     JOBS: ConsolidationJob[];
-    /**
-     * Description placeholder
-     *
-     * @type {string[]}
-     */
     IGNORELIST: string[];
 }
 
@@ -148,30 +90,13 @@ interface Configuration {
  * @typedef {FinalSummaryOptions}
  */
 interface FinalSummaryOptions {
-    /**
-     * Description placeholder
-     *
-     * @type {number}
-     */
     totalFiles: number;
-    /**
-     * Description placeholder
-     *
-     * @type {number}
-     */
     processedJobs: number;
-    /**
-     * Description placeholder
-     *
-     * @type {number}
-     */
     skippedJobs: number;
 }
 
 /******************************************************************************************************
- *
  * CONFIGURATION
- *
  ******************************************************************************************************/
 const JOB_DEFINITIONS: JobDefinition[] = [
     {
@@ -228,11 +153,6 @@ const JOB_DEFINITIONS: JobDefinition[] = [
     },
 ];
 
-/**
- * Description placeholder
- *
- * @type {Configuration}
- */
 const CONFIG: Configuration = {
     GenerateJobs: (
         outputDir: string,
@@ -266,9 +186,7 @@ CONFIG.IGNORELIST = [
 ];
 
 /******************************************************************************************************
- *
  * USER INTERFACE
- *
  ******************************************************************************************************/
 const ui = {
     /**
@@ -355,9 +273,7 @@ const ui = {
 };
 
 /******************************************************************************************************
- *
  * FILE SYSTEM INTERACTION
- *
  ******************************************************************************************************/
 const fileSystem = {
     /**
@@ -417,9 +333,7 @@ const fileSystem = {
 };
 
 /******************************************************************************************************
- *
  * MAIN EXECUTION AND EXPORTS
- *
  ******************************************************************************************************/
 const consolidateJobs = {
     /**
@@ -483,11 +397,6 @@ export const main = async (): Promise<void> => {
 };
 
 // Executes and exports the script.
-/**
- * Description placeholder
- *
- * @type {() => Promise<void>}
- */
 const consolidate = main;
 export default consolidate;
 await consolidate();

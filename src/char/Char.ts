@@ -134,6 +134,7 @@ const COMMON_ESCAPES: Record<string, string> = {
     '\0': '\\0',
     '\\': '\\\\',
 } as const;
+
 const NUMERAL_MAP: Record<string, number> = {
     Ⅰ: 1,
     Ⅱ: 2,
@@ -218,6 +219,7 @@ export class IChar {
 }
 
 export class Char extends IChar {
+    public readonly [Symbol.toStringTag] = 'Char';
     private readonly raw: string;
 
     constructor(
@@ -276,14 +278,12 @@ export class Char extends IChar {
         return this.raw;
     }
 
-    public readonly [Symbol.toStringTag] = 'Char';
-
     [inspect.custom] = (depth: number, options: InspectOptions): string => {
         // Get the private stylize function from node:util.inspect
         const stylize: InspectStylizeFn = options.stylize as InspectStylizeFn;
 
         // If recursion depth is exhausted, show a placeholder.
-        if (depth < 0) return stylize(`[Char]`, 'special');
+        if (depth < 0) return stylize(this[Symbol.toStringTag], 'special');
 
         // Get the class name and stylize it.
         const CLASSNAME = stylize(this.constructor.name, 'special');

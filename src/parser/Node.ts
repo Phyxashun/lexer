@@ -18,6 +18,8 @@ export enum NodeType {
     Operator = 'Operator',
     Slash = 'Slash',
     WhiteSpace = 'WhiteSpace',
+    Other = 'Other',
+    Error = 'Error',
 }
 
 export enum DimensionKind {
@@ -81,7 +83,7 @@ export interface OperatorNode extends CstNode {
 
 export interface WhiteSpaceNode extends CstNode {
     type: NodeType.WhiteSpace;
-    value: ' ';
+    value: ' ' | '\u0020';
 }
 
 export interface RelativeColorNode extends CstNode {
@@ -90,6 +92,16 @@ export interface RelativeColorNode extends CstNode {
     source: CstNode;
     channels: CstNode;
     alpha?: CstNode;
+}
+
+export interface OtherNode extends CstNode {
+    type: NodeType.Other;
+    value: '<other>';
+}
+
+export interface ErrorNode extends CstNode {
+    type: NodeType.Error;
+    value: '<error>';
 }
 
 export type ColorNode = IdentifierNode | HexColorNode | FunctionNode;
@@ -105,4 +117,6 @@ export type ChildNode =
     | DimensionNode
     | OperatorNode
     | WhiteSpaceNode
-    | RelativeColorNode;
+    | RelativeColorNode
+    | OtherNode
+    | ErrorNode;
