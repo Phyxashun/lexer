@@ -174,3 +174,4 @@ interface BoxTextOptions {
     textColor?: InspectColor | InspectColor[];
     textBgColor?: InspectColor | InspectColor[];
 }
+

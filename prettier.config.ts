@@ -1,25 +1,26 @@
+// ./prettier.config.ts
+
 import { type Config } from 'prettier';
 
 /**
  * @see https://prettier.io/docs/configuration
  */
 const config: Config = {
-    arrowParens: 'avoid',
-    bracketSameLine: false,
+    arrowParens: 'always',
+    bracketSameLine: true,
     objectWrap: 'preserve',
     bracketSpacing: true,
-    bracketSameLine: true,
     semi: true,
     experimentalOperatorPosition: 'end',
     experimentalTernaries: false,
     singleQuote: true,
-    jsxSingleQuote: true,
+    jsxSingleQuote: false,
     quoteProps: 'as-needed',
     trailingComma: 'all',
     singleAttributePerLine: false,
-    htmlWhitespaceSensitivity: 'strict',
+    htmlWhitespaceSensitivity: 'ignore',
     vueIndentScriptAndStyle: false,
-    proseWrap: 'preserve',
+    proseWrap: 'always',
     endOfLine: 'lf',
     insertPragma: false,
     printWidth: 80,

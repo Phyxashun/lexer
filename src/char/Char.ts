@@ -2,7 +2,7 @@
 
 import { inspect, type InspectOptions } from 'node:util';
 
-type InspectStylizeFn = (text: string, styleType: string) => string;
+type InspectStylizeFn = ( text: string, styleType: string ) => string;
 
 export enum CharType {
     // CharacterStream Control
@@ -70,56 +70,57 @@ export enum CharType {
     Unicode = 'Unicode',
 }
 
-type CharSpecFn = (char: string) => boolean;
+type CharSpecFn = ( char: string ) => boolean;
 
-export const CharSpec = new Map<CharType, CharSpecFn>([
-    [CharType.EOF, (char: string) => char === EOF_STRING],
-    [CharType.NewLine, (char: string) => /[\n\r\u2028\u2029]/u.test(char)],
-    [CharType.Whitespace, (char: string) => /[ \t\f\v\u2020]/u.test(char)],
-    [CharType.Hash, (char: string) => char === '#'],
-    [CharType.Percent, (char: string) => char === '%'],
-    [CharType.Slash, (char: string) => char === '/'],
-    [CharType.Comma, (char: string) => char === ','],
-    [CharType.LParen, (char: string) => char === '('],
-    [CharType.RParen, (char: string) => char === ')'],
-    [CharType.Plus, (char: string) => char === '+'],
-    [CharType.Minus, (char: string) => char === '-'],
-    [CharType.Star, (char: string) => char === '*'],
-    [CharType.Dot, (char: string) => char === '.'],
-    [CharType.Backtick, (char: string) => char === '`'],
-    [CharType.SingleQuote, (char: string) => char === "'"],
-    [CharType.DoubleQuote, (char: string) => char === '"'],
-    [CharType.BackSlash, (char: string) => char === '\\'],
-    [CharType.Tilde, (char: string) => char === '~'],
-    [CharType.Exclamation, (char: string) => char === '!'],
-    [CharType.At, (char: string) => char === '@'],
-    [CharType.Dollar, (char: string) => char === '$'],
-    [CharType.Question, (char: string) => char === '?'],
-    [CharType.Caret, (char: string) => char === '^'],
-    [CharType.Ampersand, (char: string) => char === '&'],
-    [CharType.LessThan, (char: string) => char === '<'],
-    [CharType.GreaterThan, (char: string) => char === '>'],
-    [CharType.Underscore, (char: string) => char === '_'],
-    [CharType.EqualSign, (char: string) => char === '='],
-    [CharType.LBracket, (char: string) => char === '['],
-    [CharType.RBracket, (char: string) => char === ']'],
-    [CharType.LBrace, (char: string) => char === '{'],
-    [CharType.RBrace, (char: string) => char === '}'],
-    [CharType.SemiColon, (char: string) => char === ';'],
-    [CharType.Colon, (char: string) => char === ':'],
-    [CharType.Pipe, (char: string) => char === '|'],
-    [CharType.Letter, (char: string) => /\p{L}/v.test(char)],
-    [CharType.Number, (char: string) => /\p{N}/v.test(char)],
-    [CharType.Emoji, (char: string) => /\p{Emoji}/v.test(char)],
-    [CharType.Currency, (char: string) => /\p{Sc}/v.test(char)],
-    [CharType.Punctuation, (char: string) => /\p{P}/v.test(char)],
-    [CharType.Symbol, (char: string) => /\p{S}/v.test(char)],
-    [CharType.Unicode, (char: string) => /\P{ASCII}/v.test(char)],
-]);
+export const CharSpec = new Map<CharType, CharSpecFn>( [
+    [ CharType.EOF, ( char: string ) => char === EOF_STRING ],
+    [ CharType.NewLine, ( char: string ) => /[\n\r\u2028\u2029]/u.test( char ) ],
+    [ CharType.Whitespace, ( char: string ) => /[ \t\f\v\u2020]/u.test( char ) ],
+    [ CharType.Hash, ( char: string ) => char === '#' ],
+    [ CharType.Percent, ( char: string ) => char === '%' ],
+    [ CharType.Slash, ( char: string ) => char === '/' ],
+    [ CharType.Comma, ( char: string ) => char === ',' ],
+    [ CharType.LParen, ( char: string ) => char === '(' ],
+    [ CharType.RParen, ( char: string ) => char === ')' ],
+    [ CharType.Plus, ( char: string ) => char === '+' ],
+    [ CharType.Minus, ( char: string ) => char === '-' ],
+    [ CharType.Star, ( char: string ) => char === '*' ],
+    [ CharType.Dot, ( char: string ) => char === '.' ],
+    [ CharType.Backtick, ( char: string ) => char === '`' ],
+    [ CharType.SingleQuote, ( char: string ) => char === '\'' ],
+    [ CharType.DoubleQuote, ( char: string ) => char === '"' ],
+    [ CharType.BackSlash, ( char: string ) => char === '\\' ],
+    [ CharType.Tilde, ( char: string ) => char === '~' ],
+    [ CharType.Exclamation, ( char: string ) => char === '!' ],
+    [ CharType.At, ( char: string ) => char === '@' ],
+    [ CharType.Dollar, ( char: string ) => char === '$' ],
+    [ CharType.Question, ( char: string ) => char === '?' ],
+    [ CharType.Caret, ( char: string ) => char === '^' ],
+    [ CharType.Ampersand, ( char: string ) => char === '&' ],
+    [ CharType.LessThan, ( char: string ) => char === '<' ],
+    [ CharType.GreaterThan, ( char: string ) => char === '>' ],
+    [ CharType.Underscore, ( char: string ) => char === '_' ],
+    [ CharType.EqualSign, ( char: string ) => char === '=' ],
+    [ CharType.LBracket, ( char: string ) => char === '[' ],
+    [ CharType.RBracket, ( char: string ) => char === ']' ],
+    [ CharType.LBrace, ( char: string ) => char === '{' ],
+    [ CharType.RBrace, ( char: string ) => char === '}' ],
+    [ CharType.SemiColon, ( char: string ) => char === ';' ],
+    [ CharType.Colon, ( char: string ) => char === ':' ],
+    [ CharType.Pipe, ( char: string ) => char === '|' ],
+    [ CharType.Letter, ( char: string ) => /\p{L}/v.test( char ) ],
+    [ CharType.Number, ( char: string ) => /\p{N}/v.test( char ) ],
+    [ CharType.Emoji, ( char: string ) => /\p{Emoji}/v.test( char ) ],
+    [ CharType.Currency, ( char: string ) => /\p{Sc}/v.test( char ) ],
+    [ CharType.Punctuation, ( char: string ) => /\p{P}/v.test( char ) ],
+    [ CharType.Symbol, ( char: string ) => /\p{S}/v.test( char ) ],
+    [ CharType.Unicode, ( char: string ) => /\P{ASCII}/v.test( char ) ],
+] );
 
 const EOF_STRING = '\u2404'; //'␄';
 const WS_STRING = '\u0020'; //' ';
-const TARGET_CHAR_DISPLAY_WIDTH = 8;
+const SPACER = ( n: number = 1 ): string => WS_STRING.repeat( n );
+const TARGET_CHAR_DISPLAY_WIDTH = 5;
 const IS_UNDEFINED = -1;
 const IS_NULL = 0;
 const SINGLE_WIDTH = 1;
@@ -184,7 +185,7 @@ export class IChar {
         position?: Position,
     ) {
         this.type = type ?? CharType.Undefined;
-        this._value = new Uint32Array(0);
+        this._value = new Uint32Array( 0 );
         this.value = value ?? WS_STRING;
         this._isSubstring = isSubstring ?? false;
         this.maxWidth = IS_NULL;
@@ -199,26 +200,27 @@ export class IChar {
         return this._isSubstring && this.position.index !== IS_UNDEFINED;
     }
 
-    public set isSubstring(value: boolean) {
+    public set isSubstring( value: boolean ) {
         this._isSubstring = value;
     }
 
     public get value(): string {
-        return Array.from(this._value)
-            .map(codePoint => String.fromCodePoint(codePoint))
-            .join('');
+        return Array.from( this._value )
+            .map( codePoint => String.fromCodePoint( codePoint ) )
+            .join( '' );
     }
 
-    public set value(character: string) {
-        const codePoints = Array.from(character).map(c => c.codePointAt(0));
-        if (codePoints.some(cp => cp > 0x10ffff)) {
-            throw new Error('Invalid Unicode code point detected.');
+    public set value( character: string ) {
+        const codePoints = Array.from( character ).map( c => c.codePointAt( 0 ) );
+        if ( codePoints.some( cp => cp > 0x10ffff ) ) {
+            throw new Error( 'Invalid Unicode code point detected.' );
         }
-        this._value = new Uint32Array(codePoints);
+        this._value = new Uint32Array( codePoints );
     }
 }
 
 export class Char extends IChar {
+    public static strSource: string = '';
     public readonly [Symbol.toStringTag] = 'Char';
     private readonly raw: string;
 
@@ -231,17 +233,17 @@ export class Char extends IChar {
     ) {
         const isSubstring = options.isSubstring ?? false;
 
-        if (character === EOF_STRING) {
-            super(CharType.EOF, EOF_STRING, isSubstring, options.position);
+        if ( character === EOF_STRING ) {
+            super( CharType.EOF, EOF_STRING, isSubstring, options.position );
             this.raw = EOF_STRING;
             return;
         }
 
-        const segmenter = new Intl.Segmenter(undefined, {
+        const segmenter = new Intl.Segmenter( undefined, {
             granularity: 'grapheme',
-        });
-        const segments = Array.from(segmenter.segment(character));
-        if (segments.length !== 1) {
+        } );
+        const segments = Array.from( segmenter.segment( character ) );
+        if ( segments.length !== 1 ) {
             throw new Error(
                 'Input must be a single visual character (grapheme).',
             );
@@ -250,7 +252,7 @@ export class Char extends IChar {
         const position = options.position;
         const validatedChar = segments[0].segment;
         super(
-            Char.getType(validatedChar),
+            Char.getType( validatedChar ),
             validatedChar,
             isSubstring,
             position,
@@ -259,17 +261,17 @@ export class Char extends IChar {
     }
 
     public override toString(): string {
-        const value = Char.handleEscape(this.value);
-        if (value !== this.value) return value;
+        const value = Char.handleEscape( this.value );
+        if ( value !== this.value ) return value;
 
-        if (/\p{Control}/u.test(value)) {
-            return Array.from(value)
-                .map(cp => {
-                    const code = cp.codePointAt(0);
-                    if (code === undefined) return EOF_STRING;
-                    return `\\u{${code.toString(16).toUpperCase()}}`;
-                })
-                .join(EOF_STRING);
+        if ( /\p{Control}/u.test( value ) ) {
+            return Array.from( value )
+                .map( cp => {
+                    const code = cp.codePointAt( 0 );
+                    if ( code === undefined ) return EOF_STRING;
+                    return `\\u{${code.toString( 16 ).toUpperCase()}}`;
+                } )
+                .join( EOF_STRING );
         }
         return value;
     }
@@ -278,71 +280,105 @@ export class Char extends IChar {
         return this.raw;
     }
 
-    [inspect.custom] = (depth: number, options: InspectOptions): string => {
+    [inspect.custom] = ( depth: number, options: InspectOptions ): string => {
         // Get the private stylize function from node:util.inspect
         const stylize: InspectStylizeFn = options.stylize as InspectStylizeFn;
 
         // If recursion depth is exhausted, show a placeholder.
-        if (depth < 0) return stylize(this[Symbol.toStringTag], 'special');
+        if ( depth < 0 ) {
+            const index = stylize( `[ ${this.position?.index} ]`, 'number' );
+            const charSymbol = stylize( this[Symbol.toStringTag], 'special' );
+            const charValue = stylize( this.toString(), 'string' );
+            const typeLabel = stylize( 'CharType.', 'special' );
+            const charType = stylize( this.type, 'string' );
+            return `${charSymbol}${index}: '${charValue}', type: ${typeLabel}${charType}`;
+        }
+
+        // Start accumulating the final output string
+        let output = '';
 
         // Get the class name and stylize it.
-        const CLASSNAME = stylize(this.constructor.name, 'special');
+        const __CLASSNAME = stylize( this.constructor.name, 'special' );
+        output += `${SPACER( 2 )}${__CLASSNAME}`;
 
         // The character string to be displayed, including escapes for things like newlines.
-        const charString = this.toString();
+        const valueString = this.toString();
 
         // Calculate the visual width of the character.
-        const visualWidth = Char.calculateVisualWidth(this.value);
+        const visualWidth = Char.calculateVisualWidth( this.value );
 
         // The total width of the content inside the padding, including the quotes
         // +2 for the single quotes
         const contentWidth = visualWidth + 2;
 
-        // Define a target total visual width for this section of the output. Let's use 8 for good spacing.
+        // Define a target total visual width for this section of the output.
         const targetWidth = TARGET_CHAR_DISPLAY_WIDTH;
 
         // Calculate how many spaces are needed for padding based on visual width.
-        // We subtract the width of the (character + 2) for the single quotes.
-        const totalPadding = Math.max(0, targetWidth - contentWidth);
-        const paddingStart = Math.floor(totalPadding / 2);
-        const paddingEnd = Math.ceil(totalPadding / 2);
+        // Subtract the width of the (character + 2) for the single quotes.
+        const totalPadding = Math.max( 0, targetWidth - contentWidth );
+        const paddingStart = Math.floor( totalPadding / 2 );
+        const paddingEnd = Math.ceil( totalPadding / 2 );
 
         // Construct the final padded string.
-        const charPadded =
-            WS_STRING.repeat(paddingStart) +
-            `'${charString}'` +
-            WS_STRING.repeat(paddingEnd);
-        const CHAR = stylize(charPadded, 'date');
+        const startPadding = SPACER( paddingStart );
+        const quoteString = `'${valueString}'`;
+        const endPadding = SPACER( paddingEnd );
+        const valuePadded = quoteString + startPadding + endPadding;
+        const stylizedValue = stylize( valuePadded, 'date' );
+        const __VALUE = `value: ${stylizedValue}`;
 
         // Handle the position info if it exists.
-        let IDX = '',
-            POS = '';
-        if (this.isSubstring) {
+        let __IDX = '';
+        let __idx = 0;
+        let __POS = '';
+        if ( options.showPosition && this.isSubstring ) {
             // Stylize the index, line and column numbers.
-            const idxPadStart = this.position.index
-                .toFixed()
-                .padStart(2, WS_STRING);
-            const linPadStart = this.position.line
-                .toFixed()
-                .padStart(2, WS_STRING);
-            const colPadStart = this.position.column
-                .toFixed()
-                .padStart(2, WS_STRING);
-            const linColInfo = `[ ${linPadStart} : ${colPadStart} ]`;
-            const posInfo = stylize(linColInfo, 'number');
-            IDX = stylize(`[${idxPadStart}]`, 'number');
-            POS = `, pos: ${posInfo}`;
+            const idx = this.position.index.toFixed();
+            __idx = idx;
+            const idxPadStart = idx.padStart( 3, SPACER() );
+            const lin = this.position.line.toFixed();
+            const linPadStart = lin.padStart( 2, SPACER() );
+            const col = this.position.column.toFixed();
+            const colPadStart = col.padStart( 2, SPACER() );
+            const idxLinColInfo = `[ I: ${idxPadStart}, L:${linPadStart}, C:${colPadStart} ]`;
+            const posInfo = stylize( idxLinColInfo, 'number' );
+            __IDX = stylize( `[${idxPadStart}]`, 'number' );
+            __POS = `, pos: ${posInfo}`;
+        } else if ( !options.showPosition && this.isSubstring ) {
+            const idx = this.position.index.toFixed();
+            __idx = idx;
+            const idxPadStart = idx.padStart( 3, SPACER() );
+            __IDX = stylize( `[${idxPadStart}]`, 'number' );
         }
 
         // Get the type and stylize it.
         const typeChar = this.type;
-        const typePadEnd = typeChar.padEnd(11, WS_STRING);
-        const typeInfo = stylize(typePadEnd, 'string');
-        const charType = stylize(`CharType.`, 'special');
-        const TYPE = `type: ${charType}${typeInfo}${POS}`;
+        const typePadEnd = typeChar.padEnd( 11, SPACER() );
+        const typeInfo = stylize( typePadEnd, 'string' );
+        const charType = stylize( 'CharType.', 'special' );
+        const __TYPE = `type: ${charType}${typeInfo}`;
+
+        output += `${__IDX}: ${__VALUE}: `;
+
+        if ( options.showPosition ) {
+            output += `${__TYPE}${__POS}`;
+        } else {
+            output += `${__TYPE}`;
+        }
 
         // Combine everything into the final string.
-        return `${CLASSNAME}${IDX}: ${CHAR}: { ${TYPE} }`;
+        if ( __idx === 0 ) {
+            output = '\n' + output;
+        }
+
+        if ( __idx < Char.strSource.length - 1 ) {
+            output = output;
+        } else if ( __idx === Char.strSource.length - 1 ) {
+            output += '\n';
+        }
+
+        return output;
     };
 
     public isEOF(): boolean {
@@ -351,7 +387,7 @@ export class Char extends IChar {
 
     public isHexValue(): boolean {
         // The 'u' flag enables Unicode support, required for \p{} property escapes.
-        return /^\p{ASCII_Hex_Digit}$/u.test(this.getRawString());
+        return /^\p{ASCII_Hex_Digit}$/u.test( this.getRawString() );
     }
 
     public isNumber(): boolean {
@@ -401,29 +437,29 @@ export class Char extends IChar {
 
     public isUpperCase(): boolean {
         // \p{Lu} = Unicode Uppercase Letter
-        return /\p{Lu}/u.test(this.value);
+        return /\p{Lu}/u.test( this.value );
     }
 
     public isLowerCase(): boolean {
         // \p{Ll} = Unicode Lowercase Letter
-        return /\p{Ll}/u.test(this.value);
+        return /\p{Ll}/u.test( this.value );
     }
 
     public getNumericValue(): number {
         const val = this.value;
 
         // Check if the value is a non-digit value
-        const nonDigit = Char.handleNonDigit(val);
-        if (nonDigit !== IS_UNDEFINED) return nonDigit;
+        const nonDigit = Char.handleNonDigit( val );
+        if ( nonDigit !== IS_UNDEFINED ) return nonDigit;
 
         // Normalize the string. NFKD compatibility decomposition is a good choice.
-        const normalizedVal = val.normalize('NFKD');
+        const normalizedVal = val.normalize( 'NFKD' );
 
         // Use a regex to filter for standard digits after normalization
-        const digits = normalizedVal.replace(/[^0-9]/g, '');
+        const digits = normalizedVal.replace( /[^0-9]/g, '' );
 
         // Basic check for standard digits 0-9
-        if (digits) return parseInt(digits, 10);
+        if ( digits ) return parseInt( digits, 10 );
 
         // For other Unicode numbers, you might return the code point
         // or use a library to get the actual decimal value
@@ -434,7 +470,8 @@ export class Char extends IChar {
         return this._value;
     }
 
-    public static fromString(str: string): Char[] {
+    public static fromString( str: string ): Char[] {
+        this.strSource = str;
         const chars: Char[] = [];
         let maxWidth = 0;
 
@@ -442,24 +479,24 @@ export class Char extends IChar {
         let line = 1;
         let column = 1;
 
-        const segmenter = new Intl.Segmenter(undefined, {
+        const segmenter = new Intl.Segmenter( undefined, {
             granularity: 'grapheme',
-        });
-        const segments = segmenter.segment(str);
+        } );
+        const segments = segmenter.segment( str );
 
-        for (const { segment, index } of segments) {
+        for ( const { segment, index } of segments ) {
             // Create the position for the CURRENT character
             const position = { index, line, column };
 
             chars.push(
-                new Char(segment, {
+                new Char( segment, {
                     isSubstring: true,
                     position: position,
-                }),
+                } ),
             );
 
             // Update line/col for the NEXT character
-            if (segment === '\n' || segment === '\r\n' || segment === '\r') {
+            if ( segment === '\n' || segment === '\r\n' || segment === '\r' ) {
                 line++;
                 column = 1;
             } else {
@@ -470,43 +507,43 @@ export class Char extends IChar {
         // Ensure the EOF Char is added at the final position
         const eofPosition = { index: str.length, line, column };
         chars.push(
-            new Char(EOF_STRING, {
+            new Char( EOF_STRING, {
                 isSubstring: true,
                 position: eofPosition,
-            }),
+            } ),
         );
 
         // Calculate maxWidth for visual alignment in logs
-        const lines = str.split(/\r?\n/);
-        for (const l of lines) {
-            const currentLineWidth = Char.calculateVisualWidth(l);
-            if (currentLineWidth > maxWidth) maxWidth = currentLineWidth;
+        const lines = str.split( /\r?\n/ );
+        for ( const l of lines ) {
+            const currentLineWidth = Char.calculateVisualWidth( l );
+            if ( currentLineWidth > maxWidth ) maxWidth = currentLineWidth;
         }
 
-        for (const c of chars) {
+        for ( const c of chars ) {
             c.maxWidth = maxWidth;
         }
 
         return chars;
     }
 
-    public static calculateVisualWidth(str: string): number {
-        const escaped = Char.handleEscape(str);
-        if (escaped !== str) return escaped.length;
-        const segmenter = new Intl.Segmenter(undefined, {
+    public static calculateVisualWidth( str: string ): number {
+        const escaped = Char.handleEscape( str );
+        if ( escaped !== str ) return escaped.length;
+        const segmenter = new Intl.Segmenter( undefined, {
             granularity: 'grapheme',
-        });
-        const segments = Array.from(segmenter.segment(str));
-        if (segments.length === 0) return IS_NULL;
+        } );
+        const segments = Array.from( segmenter.segment( str ) );
+        if ( segments.length === 0 ) return IS_NULL;
         const char = segments[0].segment;
-        if (char.includes('\uFE0F')) return DOUBLE_WIDTH;
-        if (/\p{Emoji_Presentation}/v.test(char)) return DOUBLE_WIDTH;
-        const codePoint = char.codePointAt(0);
-        if (codePoint && this.isDoubleWidth(codePoint)) return DOUBLE_WIDTH;
+        if ( char.includes( '\uFE0F' ) ) return DOUBLE_WIDTH;
+        if ( /\p{Emoji_Presentation}/v.test( char ) ) return DOUBLE_WIDTH;
+        const codePoint = char.codePointAt( 0 );
+        if ( codePoint && this.isDoubleWidth( codePoint ) ) return DOUBLE_WIDTH;
         return SINGLE_WIDTH;
     }
 
-    public static isMultiCharacter(str: string): boolean {
+    public static isMultiCharacter( str: string ): boolean {
         return (
             str === '\\n' ||
             str === '\\t' ||
@@ -516,49 +553,49 @@ export class Char extends IChar {
         );
     }
 
-    public static isZeroWidth(code: number): boolean {
+    public static isZeroWidth( code: number ): boolean {
         return (
             code <= 0x1f ||
-            (code >= 0x7f && code <= 0x9f) ||
-            (code >= 0x300 && code <= 0x36f) ||
-            (code >= 0x200b && code <= 0x200f) ||
-            (code >= 0xfe00 && code <= 0xfe0f) ||
-            (code >= 0xfeff && code <= 0xfeff)
+            ( code >= 0x7f && code <= 0x9f ) ||
+            ( code >= 0x300 && code <= 0x36f ) ||
+            ( code >= 0x200b && code <= 0x200f ) ||
+            ( code >= 0xfe00 && code <= 0xfe0f ) ||
+            ( code >= 0xfeff && code <= 0xfeff )
         );
     }
 
-    public static isDoubleWidth(code: number): boolean {
+    public static isDoubleWidth( code: number ): boolean {
         return (
-            (code >= 0x1100 && code <= 0x115f) || // Hangul Jamo
-            (code >= 0x2329 && code <= 0x232a) || // Left/Right Angle Bracket
-            (code >= 0x3040 && code <= 0x309f) || // Hiragana
-            (code >= 0x30a0 && code <= 0x30ff) || // Katakana
-            (code >= 0x4e00 && code <= 0x9fff) || // CJK Unified Ideographs
-            (code >= 0xac00 && code <= 0xd7a3) || // Hangul Syllables
-            (code >= 0xf900 && code <= 0xfaff) || // CJK Compatibility Ideographs
-            (code >= 0xfe10 && code <= 0xfe19) || // Vertical Forms
-            (code >= 0xfe30 && code <= 0xfe6f) || // CJK Compatibility Forms
-            (code >= 0xff00 && code <= 0xffef) || // Halfwidth and Fullwidth Forms
+            ( code >= 0x1100 && code <= 0x115f ) || // Hangul Jamo
+            ( code >= 0x2329 && code <= 0x232a ) || // Left/Right Angle Bracket
+            ( code >= 0x3040 && code <= 0x309f ) || // Hiragana
+            ( code >= 0x30a0 && code <= 0x30ff ) || // Katakana
+            ( code >= 0x4e00 && code <= 0x9fff ) || // CJK Unified Ideographs
+            ( code >= 0xac00 && code <= 0xd7a3 ) || // Hangul Syllables
+            ( code >= 0xf900 && code <= 0xfaff ) || // CJK Compatibility Ideographs
+            ( code >= 0xfe10 && code <= 0xfe19 ) || // Vertical Forms
+            ( code >= 0xfe30 && code <= 0xfe6f ) || // CJK Compatibility Forms
+            ( code >= 0xff00 && code <= 0xffef ) || // Halfwidth and Fullwidth Forms
             code >= 0x1f300
         );
     }
 
-    public static getType = (char: string): CharType => {
-        if (char === undefined) return CharType.Undefined;
-        if (char === null) return CharType.Error;
-        for (const [type, predicate] of CharSpec) {
-            if (predicate(char)) return type;
+    public static getType = ( char: string ): CharType => {
+        if ( char === undefined ) return CharType.Undefined;
+        if ( char === null ) return CharType.Error;
+        for ( const [ type, predicate ] of CharSpec ) {
+            if ( predicate( char ) ) return type;
         }
         return CharType.Undefined;
     };
 
-    public static handleEscape(value: string): string {
-        if (COMMON_ESCAPES[value]) return COMMON_ESCAPES[value];
+    public static handleEscape( value: string ): string {
+        if ( COMMON_ESCAPES[value] ) return COMMON_ESCAPES[value];
         return value;
     }
 
-    public static handleNonDigit(value: string): number {
-        if (NUMERAL_MAP[value] !== undefined) {
+    public static handleNonDigit( value: string ): number {
+        if ( NUMERAL_MAP[value] !== undefined ) {
             return NUMERAL_MAP[value];
         }
 

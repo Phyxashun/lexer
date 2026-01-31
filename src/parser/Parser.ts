@@ -7,7 +7,7 @@ import type { CstNode, FunctionNode } from './Node';
 import { NodeType } from './Node';
 import { validateColorFunction, validateHexColor } from './Validation';
 
-const SPACER = (n: number): string => ' '.repeat(n);
+const SPACER = (n: number = 1): string => ' '.repeat(n);
 
 export class Parser {
     public readonly [Symbol.toStringTag] = 'Parser';
@@ -43,23 +43,32 @@ export class Parser {
         const calculateNodeWidths = (node: CstNode): void => {
             if (!node) return;
 
-            // Calculate width of the NodeType string
-            const typeString = NodeType[node.type] || NodeType.Error;
-            const nodeTypeString = '[NodeType.' + typeString + ']';
+            // NodeType
+            const type = 'NodeType.';
+            const stylizedType = stylize(type, 'special');
+            const typeValue = NodeType[node.type];
+            const stylizedTypeValue = stylize(typeValue, 'string');
+            const nodeTypeString = stylizedType + stylizedTypeValue;
+            const formattedType = `type: ${nodeTypeString}`;
             widths.maxTypeWidth = Math.max(
                 widths.maxTypeWidth,
-                nodeTypeString.length,
+                formattedType.length,
             );
 
-            // Calculate width of the properties string (e.g., "name: 'rgb'")
+            // Properties (e.g., "name: 'rgb'")
             const props = [];
-            if ('name' in node) props.push(`name: '${node.name}'`);
-            if ('value' in node) {
-                const displayValue =
-                    node.type === NodeType.WhiteSpace ? '\u0020' : node.value;
-                props.push(`value: '${String(displayValue)}'`);
+            if ('name' in node) {
+                const propName = `name: '${node.name}'`;
+                props.push(propName);
             }
-            if ('unit' in node) props.push(`unit: '${node.unit}'`);
+            if ('value' in node) {
+                const propValue = `value: '${String(node.value)}'`;
+                props.push(propValue);
+            }
+            if ('unit' in node) {
+                const propUnit = `unit: '${node.unit}'`;
+                props.push(propUnit);
+            }
             const propsString = props.join(', ');
             widths.maxPropsWidth = Math.max(
                 widths.maxPropsWidth,
@@ -78,32 +87,22 @@ export class Parser {
          * Recursively traverses the CST to render a formatted string representation,
          * using the pre-calculated maximum widths for padding.
          * @param node The current node to render.
-         * @param indent The indentation string for the current level.
+         * @param indent The number of spaces to move right for the current level.
          * @returns A string representation of the node tree.
          */
-        const renderNode = (node: CstNode, indent: string): string => {
-            let output = indent;
-            const childIndent = indent + indent;
-
-            // NodeType
-            const typeString = NodeType[node.type] || NodeType.Error;
-            const nodeTypeString = ('[NodeType.' + typeString + ']').padEnd(
-                widths.maxTypeWidth,
-                SPACER(1),
-            );
-            const styledType = stylize(nodeTypeString, 'special');
-            output += `${styledType} : `;
+        const renderNode = (node: CstNode, indent: number): string => {
+            let output = SPACER(indent);
 
             // Properties
             const props = [];
             if ('name' in node)
-                props.push(`name: '${stylize(node.name, 'string')}'`);
+                props.push(`name: '${stylize(node.name, 'number')}'`);
 
             if ('value' in node) {
                 const value =
                     node.type === NodeType.WhiteSpace ? '\u0020' : node.value;
-                const displayValue = value.toString();
-                props.push(`value: '${stylize(displayValue, 'string')}'`);
+                const displayValue = `'${value.toString()}'`;
+                props.push(`value: ${stylize(displayValue, 'date')}`);
             }
 
             if ('unit' in node)
@@ -120,8 +119,18 @@ export class Parser {
             // Add a comma if there were properties
             if (props.length > 0) output += ', ';
 
+            // NodeType
+            const type = 'NodeType.';
+            const stylizedType = stylize(type, 'special');
+            const typeValue = NodeType[node.type];
+            const stylizedTypeValue = stylize(typeValue, 'string');
+            const nodeTypeString = stylizedType + stylizedTypeValue;
+            const styledType = `type: ${nodeTypeString}`;
+            output += styledType.padEnd(widths.maxTypeWidth, SPACER(1));
+            output += ' , ';
+
             // Span
-            if (node.span) {
+            if (options.showSpan && node.span) {
                 const span = node.span;
                 const start = span.start.toFixed().padStart(2, ' ');
                 const end = span.end.toFixed().padStart(2, ' ');
@@ -134,16 +143,17 @@ export class Parser {
             output += '\n';
 
             // Recurse into children
+            const childIndent = indent;
             if (
                 'children' in node &&
                 node.children &&
                 node.children.length > 0
             ) {
-                output += `${childIndent}CHILDREN: [\n`;
+                output += `${SPACER(childIndent)}CHILDREN:\n${SPACER(childIndent)}[\n`;
                 for (const child of node.children) {
-                    output += renderNode(child, childIndent + '  ');
+                    output += renderNode(child, childIndent + indent);
                 }
-                output += `${childIndent}]\n`;
+                output += `${SPACER(childIndent)}]\n`;
             }
             return output;
         };
@@ -153,11 +163,11 @@ export class Parser {
         calculateNodeWidths(this.node);
 
         // Second pass: Render the tree with alignment
-        const treeOutput = renderNode(this.node, SPACER(2));
+        const treeOutput = renderNode(this.node, 2);
 
         const name = this.constructor.name.toUpperCase();
         const className = stylize(name + ': ', 'special');
-        return `${className} {\n${treeOutput}}`;
+        return `${className}\n{\n${treeOutput}}}`;
     };
 
     private isEOF(): boolean {

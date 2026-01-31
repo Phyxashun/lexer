@@ -1,4 +1,6 @@
+// "'JetBrainsMono Nerd Font Mono'",
 {
+    // ./.vscode/settings.json
     //
     // ─── ⚙️ GENERAL SETTINGS ────────────────────────────────────────────────────────
     //
@@ -20,14 +22,14 @@
     //
     // ─── 🖥️ TERMINAL SETTINGS ───────────────────────────────────────────────────────
     //
-    "terminal.integrated.fontFamily": "'JetBrainsMono Nerd Font Mono'",
-    "terminal.integrated.fontSize": 14,
+    "terminal.integrated.fontFamily": "'Hack Nerd Font Mono'",
+    "terminal.integrated.fontSize": 12,
     "terminal.integrated.lineHeight": 1.15,
     //
     // ─── 📝 EDITOR CORE SETTINGS ────────────────────────────────────────────────────
     //
     "editor.fontFamily": "'JetBrainsMono Nerd Font Mono'",
-    "editor.fontSize": 16,
+    "editor.fontSize": 14,
     "editor.lineHeight": 1.4,
     "editor.fontLigatures": true,
     "editor.smoothScrolling": true,
@@ -58,9 +60,6 @@
     "editor.formatOnPaste": true,
     "editor.formatOnSave": true,
     "editor.formatOnType": true,
-    "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": "explicit"
-    },
     //
     // ─── 📁 CODE FOLDING ────────────────────────────────────────────────────────────
     //
@@ -77,11 +76,12 @@
     "typescript.preferences.quoteStyle": "single",
     "typescript.updateImportsOnFileMove.enabled": "always",
     "typescript.suggest.paths": false,
-    "typescript.tsserver.log": "verbose",
+    "typescript.tsserver.log": "off",
+    "typescript.tsserver.enableTracing": false,
     "typescript.tsserver.useSyntaxServer": "always",
     "[typescript]": {
         "files.autoSave": "onFocusChange",
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint",
         "editor.foldingStrategy": "auto",
         "editor.wordWrap": "on"
     },
@@ -93,7 +93,7 @@
     "javascript.suggest.paths": false,
     "[javascript]": {
         "files.autoSave": "onFocusChange",
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint",
         "editor.foldingStrategy": "auto",
         "editor.wordWrap": "on"
     },
@@ -198,10 +198,14 @@
         }
     ],
     //------ ESLint ------//
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "eslint.format.enable": true,
     "eslint.enable": true,
     "eslint.validate": [
         "javascript",
-        "typescript"
+        "javascriptreact",
+        "typescript",
+        "typescriptreact"
     ],
     "eslint.codeAction.showDocumentation": {
         "enable": true
@@ -213,6 +217,9 @@
     "eslint.useFlatConfig": true,
     "eslint.options": {
         "overrideConfigFile": "eslint.config.ts"
+    },
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit"
     },
     //------ EmogiSense ------//
     "emojisense.languages": {
@@ -253,5 +260,8 @@
     "[editorconfig]": {
         "editor.defaultFormatter": "EditorConfig.EditorConfig"
     },
-    "typescript.tsdk": "node_modules/typescript/lib"
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "[powershell]": {
+        "editor.defaultFormatter": "ms-vscode.powershell"
+    }
 }

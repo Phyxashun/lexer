@@ -5,7 +5,7 @@ import { TokenType, type Token, type Span } from './Token';
 import { State, DFA, ACCEPT, foldIdentifierToken } from './State';
 import { Char } from '../char/Char';
 
-const SPACER = (n: number): string => ' '.repeat(n);
+const SPACER = (n: number = 1): string => ' '.repeat(n);
 
 const typesToSkip = new Set([]);
 
@@ -40,7 +40,8 @@ export class Lexer {
         // If recursion depth is exhausted, return a simple placeholder.
         if (depth < 0) return stylize(this[Symbol.toStringTag], 'special');
 
-        let output = `TOKENS:\n`;
+        const className = stylize(`LEXER:`, 'special');
+        let output = `${className}\n${SPACER(2)}[\n`;
 
         if (this.tokens.length === 0) {
             output += `${SPACER(4)}// No tokens were generated.\n`;
@@ -54,8 +55,7 @@ export class Lexer {
                     maxValueWidth = valueStr.length + 1;
                 }
 
-                const typeName =
-                    TokenType[token.type] || `UNKNOWN(${token.type})`;
+                const typeName = TokenType[token.type];
                 if (typeName.length > maxTypeNameWidth) {
                     maxTypeNameWidth = typeName.length + 1;
                 }
@@ -69,44 +69,50 @@ export class Lexer {
                 );
 
                 // Index
-                const idxPadStart = i.toFixed().padStart(3, ' ');
+                const idxPadStart = i.toFixed().padStart(3, SPACER());
                 const IDX = stylize(`[${idxPadStart}]`, 'number');
 
                 // Value
                 const tokenValueString = `'${token.value.replace(/\n/g, '\\n')}'`;
-                const paddedValue = tokenValueString.padEnd(maxValueWidth, ' ');
-                const VAL = stylize(paddedValue, 'string');
+                const paddedValue = tokenValueString.padEnd(
+                    maxValueWidth,
+                    SPACER(),
+                );
+                const stylizedValue = stylize(paddedValue, 'date');
+                const VAL = `value: ${stylizedValue}`;
 
                 // Type
-                const typeName =
-                    TokenType[token.type] || `UNKNOWN(${token.type})`;
-                const paddedTypeName = typeName.padEnd(maxTypeNameWidth, ' ');
+                const typeName = TokenType[token.type];
+                const paddedTypeName = typeName.padEnd(
+                    maxTypeNameWidth,
+                    SPACER(),
+                );
                 const TYPE_INFO = stylize(paddedTypeName, 'string');
                 const TOKEN_TYPE_LABEL = stylize('TokenType.', 'special');
                 const TYPE = `type: ${TOKEN_TYPE_LABEL}${TYPE_INFO}`;
 
-                output += `${SPACER(2)}${TOKEN_CLASSNAME}${IDX}: ${VAL}, ${TYPE}`;
+                output += `${SPACER(4)}${TOKEN_CLASSNAME}${IDX}: ${VAL}, ${TYPE}`;
 
                 // Position
-                if (token.span) {
+                if (options.showSpan && token.span) {
                     const span = token.span;
-                    const start = span.start.toFixed().padStart(2, ' ');
-                    const end = span.end.toFixed().padStart(2, ' ');
-                    const line = span.line.toFixed().padStart(2, ' ');
-                    const column = span.column.toFixed().padStart(2, ' ');
-                    const length = span.length.toFixed().padStart(3, ' ');
+                    const start = span.start.toFixed().padStart(2, SPACER());
+                    const end = span.end.toFixed().padStart(2, SPACER());
+                    const line = span.line.toFixed().padStart(2, SPACER());
+                    const column = span.column.toFixed().padStart(2, SPACER());
+                    const length = span.length.toFixed().padStart(3, SPACER());
                     const spanInfo = `[S:${start}, E:${end}, L:${line}, C:${column}, len:${length}]`;
                     output += `, span: ${stylize(spanInfo, 'number')}`;
                 }
 
                 // Append the message if it exists.
-                if (token.message) {
+                if (options.showMessage && token.message) {
                     output += `, msg: '${stylize(token.message, 'regexp')}'`;
                 }
-                output += '\n';
+                output += ',\n';
             }
         }
-        //output += `  ]\n`;
+        output += `${SPACER(2)}]\n`;
         //output += `}`;
         return output;
     };
