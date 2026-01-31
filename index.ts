@@ -9,10 +9,10 @@ import { ParseError } from './src/parser/ParseError';
 import { LexerError } from './src/lexer/LexerError';
 import { BoxText, BoxType } from './src/logger/logger';
 
+type Results = { chars?: Char[]; lexer?: Lexer; parser?: Parser; };
+
 const SPACER = ( n: number = 1 ) => '\u0020'.repeat( n );
-/**
- * Configuration for controlling console.log output of testing
- */
+
 const config = {
     // OPTIONAL: SET THE LAST TEST NUMBER TO EXECUTE
     lastTest: 15,
@@ -21,13 +21,13 @@ const config = {
     options: { ...inspectOptions, breakLength: 80 } as InspectOptions,
 
     // OPTIONAL FORMATTING FLAGS:
-    display: { EOF: false, pos: true, span: true, msg: true },
+    display: { EOF: true, pos: false, span: false, msg: true },
 
     // CHARS
-    chars: { get: true, log: true },
+    chars: { get: true, log: false },
 
     // LEXER/TOKENS
-    tokens: { get: true, log: true },
+    tokens: { get: true, log: false },
 
     // PARSER/CST
     cst: { get: true, log: true },
@@ -165,21 +165,17 @@ const logger = {
     }
 };
 
-const runTest = ( testStr: string ): void => {
-    const results: { chars?: Char[]; lexer?: Lexer; parser?: Parser; } = {};
+const runTest = ( testStr: string ): Results => {
+    const results: Results = {};
     
-    // Create characters
     if ( !config.chars.get ) throw new Error( 'Character processing disabled' );
     results.chars = Char.fromString( testStr );
     
-    // Lex tokens
     if ( config.tokens.get ) results.lexer = new Lexer( results.chars, testStr );
     
-    // Parse CST
     if ( config.cst.get ) {
-        if ( !results.lexer ) {
-            throw new Error( 'Lexer must be enabled to generate CST' );
-        }
+        if ( !results.lexer ) throw new Error( 'Lexer must be enabled to generate CST' );
+    
         results.parser = new Parser( results.lexer.tokens, testStr );
         results.parser.parse();
     }
@@ -187,25 +183,35 @@ const runTest = ( testStr: string ): void => {
     return results;
 };
 
-const displayResults = ( results: ReturnType<typeof runTest> ): void => {
+const displayResults = ( results: Results ): void => {
     if ( results.chars && config.chars.log ) {
-        const chars = maybeStripEOF( results.chars, !config.display.EOF );
-        logger.section( 'CHARS', chars, { showPosition: config.display.pos } );
+        logger.section(
+            'CHARS',
+            maybeStripEOF( results.chars, !config.display.EOF ),
+            { showPosition: config.display.pos }
+        );
     }
     
     if ( results.lexer && config.tokens.log ) {
-        const lexer = maybeStripEOF( results.lexer, !config.display.EOF );
-        logger.section( 'TOKENS', lexer, {
-            showSpan: config.display.span,
-            showMessage: config.display.msg,
-        } );
+        logger.section(
+            'TOKENS',
+            maybeStripEOF( results.lexer, !config.display.EOF ),
+            {
+                showSpan: config.display.span,
+                showMessage: config.display.msg,
+            }
+        );
     }
     
     if ( results.parser && config.cst.log ) {
-        logger.section( 'CONCRETE SYNTAX TREE (CST)', results.parser, {
-            showSpan: config.display.span,
-            showMessage: config.display.msg,
-        } );
+        logger.section(
+            'CONCRETE SYNTAX TREE (CST)',
+            results.parser,
+            {
+                showSpan: config.display.span,
+                showMessage: config.display.msg,
+            }
+        );
     }
 };
 
