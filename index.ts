@@ -7,25 +7,9 @@ import { Lexer } from './src/lexer/Lexer';
 import { Parser } from './src/parser/Parser';
 import { ParseError } from './src/parser/ParseError';
 import { LexerError } from './src/lexer/LexerError';
-import { CstNode } from './src/parser/Node';
 import { BoxText, BoxType } from './src/logger/logger';
 
-// TODO add custom inspect to tokens and cst
-
-// Types
-type Result<T, E = Error> =
-    | { success: true; value: T; }
-    | { success: false; error: E; };
-
-type TestResult = Result<
-    { chars?: Char[]; lexer?: Lexer; cst?: CstNode; },
-    LexerError | ParseError
->;
-
-// Constants
-const ON = true;
-const OFF = false;
-
+const SPACER = ( n: number = 1 ) => '\u0020'.repeat( n );
 /**
  * Configuration for controlling console.log output of testing
  */
@@ -37,16 +21,16 @@ const config = {
     options: { ...inspectOptions, breakLength: 80 } as InspectOptions,
 
     // OPTIONAL FORMATTING FLAGS:
-    display: { EOF: OFF, pos: ON, span: ON, msg: ON },
+    display: { EOF: false, pos: true, span: true, msg: true },
 
     // CHARS
-    chars: { get: ON, log: ON },
+    chars: { get: true, log: true },
 
     // LEXER/TOKENS
-    tokens: { get: ON, log: ON },
+    tokens: { get: true, log: true },
 
     // PARSER/CST
-    cst: { get: ON, log: ON },
+    cst: { get: true, log: true },
 } as const;
 
 const tests: Map<number, string> = new Map<number, string>( [
@@ -136,149 +120,112 @@ const tests: Map<number, string> = new Map<number, string>( [
     [ 46, 'rgb(from red 255 b b)' ], // Absolute R, blue channel for green
 ] );
 
-// Helper functions
-const ok = <T>( value: T ): Result<T, never> => ( { success: true, value } );
-
-const err = <E>( error: E ): Result<never, E> => ( { success: false, error } );
-
-const strip = {
-    charsEOF: ( chars: Char[] ): Char[] => {
-        if ( !Array.isArray( chars ) ) return chars;
-        return chars.slice( 0, -1 );
-    },
-
-    tokensEOF: ( lexer: Lexer ): Lexer => {
-        if ( !( lexer instanceof Lexer ) ) return lexer;
-        if ( !Array.isArray( lexer.tokens ) ) return lexer;
-        lexer.tokens = lexer.tokens.filter( t => t.type !== 'EOF' );
-        return lexer;
-    },
+const maybeStripEOF = <T>( value: T, shouldStrip: boolean ): T => {
+    if ( !shouldStrip ) return value;
+    
+    if ( Array.isArray( value ) ) {
+        return value.slice( 0, -1 ) as T;
+    }
+    
+    if ( value instanceof Lexer && Array.isArray( value.tokens ) ) {
+        value.tokens = value.tokens.filter( t => t.type !== 'EOF' );
+    }
+    
+    return value;
 };
 
-const log = {
-    mainTitle: (): void => {
+const logger = {
+    mainTitle: () => {
         console.log( '\n' );
         BoxText( 'TESTING', { width: 'max', boxType: BoxType.light } );
     },
-
-    title: ( num: number, str: string ): void => {
-        const spacer = ' '.repeat( 12 );
+    
+    testTitle: ( num: number, str: string ) => {
         const styledNum = styleText( [ 'blue', 'bold' ], `Test[${num}]` );
         const styledStr = styleText( [ 'black', 'bgYellow' ], `"${str}"` );
-        const styledStrLabel = styleText( [ 'yellow' ], 'Current Input' );
-        const result = `${styledNum}: ${spacer}${styledStrLabel}: ${styledStr}`;
+        const label = styleText( [ 'yellow' ], 'Current Input' );
         console.log( '\n' );
-        BoxText( result, { width: 'max', boxAlign: 'left' } );
+        BoxText( `${styledNum}: ${SPACER( 12 )}${label}: ${styledStr}`, { 
+            width: 'max', 
+            boxAlign: 'left' 
+        } );
     },
-
-    chars: ( chars: Char[] ): void => {
-        console.log( 'CHARS:' );
-        const strippedEOF = config.display.EOF ? strip.charsEOF( chars ) : chars;
-        const options = { ...config.options, showPosition: config.display.pos };
-        console.log( inspect( strippedEOF, options ) + '\n' );
+    
+    section: ( title: string, data: unknown, extraOptions = {} ) => {
+        console.log( `${title}:` );
+        console.log( inspect( data, { ...config.options, ...extraOptions } ) );
+        if ( title !== 'CONCRETE SYNTAX TREE (CST)' ) console.log();
     },
-
-    tokens: ( lexer: Lexer ): void => {
-        console.log( 'TOKENS:' );
-        const strippedEOF = config.display.EOF ? strip.tokensEOF( lexer ) : lexer;
-        const options = {
-            ...config.options,
-            showSpan: config.display.span,
-            showMessage: config.display.msg,
-        };
-        console.log( inspect( strippedEOF, options ) );
-    },
-
-    cst: ( parser: Parser ): void => {
-        console.log( 'CONCRETE SYNTAX TREE (CST):' );
-        const options = {
-            ...config.options,
-            showSpan: config.display.span,
-            showMessage: config.display.msg,
-        };
-        console.log( inspect( parser, options ) );
-    },
-};
-
-/**
- * Separates error reporting from the execution logic.
- */
-const handleTestError = ( e: Error ) => {
-    if ( e instanceof LexerError ) {
-        console.error( '\n*** LEXING FAILED ***', e.toString() );
-    } else if ( e instanceof ParseError ) {
-        console.error( '\n*** PARSING FAILED ***', e.toString() );
-    } else {
-        console.error( '\n*** UNKNOWN FAILURE ***', e );
+    
+    error: ( e: Error ) => {
+        const message = e instanceof LexerError ? '*** LEXING FAILED ***'
+            : e instanceof ParseError ? '*** PARSING FAILED ***'
+                : '*** UNKNOWN FAILURE ***';
+        console.error( `\n${message}`, e.toString() );
     }
 };
 
-/**
- * Simplifies the main loop by focusing strictly on the execution flow.
- * Each step only runs if the previous one succeeded and the config allows it.
- */
-const runTests = ( testStr: string ): TestResult => {
-    try {
-        const output: { chars?: Char[]; lexer?: Lexer; parser?: CstNode; } = {};
-
-        if ( config.chars.get ) {
-            output.chars = Char.fromString( testStr );
-        } else {
-            throw new Error(
-                'Character processing (config.chars.get) is disabled.',
-            );
+const runTest = ( testStr: string ): void => {
+    const results: { chars?: Char[]; lexer?: Lexer; parser?: Parser; } = {};
+    
+    // Create characters
+    if ( !config.chars.get ) throw new Error( 'Character processing disabled' );
+    results.chars = Char.fromString( testStr );
+    
+    // Lex tokens
+    if ( config.tokens.get ) results.lexer = new Lexer( results.chars, testStr );
+    
+    // Parse CST
+    if ( config.cst.get ) {
+        if ( !results.lexer ) {
+            throw new Error( 'Lexer must be enabled to generate CST' );
         }
+        results.parser = new Parser( results.lexer.tokens, testStr );
+        results.parser.parse();
+    }
+    
+    return results;
+};
 
-        if ( config.tokens.get ) {
-            output.lexer = new Lexer( output.chars, testStr );
-        }
-
-        if ( config.cst.get ) {
-            if ( !output.lexer ) {
-                throw new Error(
-                    'Lexer step must be enabled (config.tokens.get) to generate a CST.',
-                );
-            }
-            output.parser = new Parser( output.lexer.tokens, testStr );
-            output.parser.parse();
-        }
-
-        if ( Object.keys( output ).length === 0 ) {
-            throw new Error(
-                'Nothing to do! All processing steps are disabled in the config.',
-            );
-        }
-
-        return ok( output );
-    } catch ( e ) {
-        return err( e as LexerError | ParseError );
+const displayResults = ( results: ReturnType<typeof runTest> ): void => {
+    if ( results.chars && config.chars.log ) {
+        const chars = maybeStripEOF( results.chars, !config.display.EOF );
+        logger.section( 'CHARS', chars, { showPosition: config.display.pos } );
+    }
+    
+    if ( results.lexer && config.tokens.log ) {
+        const lexer = maybeStripEOF( results.lexer, !config.display.EOF );
+        logger.section( 'TOKENS', lexer, {
+            showSpan: config.display.span,
+            showMessage: config.display.msg,
+        } );
+    }
+    
+    if ( results.parser && config.cst.log ) {
+        logger.section( 'CONCRETE SYNTAX TREE (CST)', results.parser, {
+            showSpan: config.display.span,
+            showMessage: config.display.msg,
+        } );
     }
 };
 
 const main = (): void => {
-    log.mainTitle();
+    logger.mainTitle();
+    
     for ( const [ testNumber, testStr ] of tests ) {
         if ( config.lastTest && testNumber >= config.lastTest ) break;
-        log.title( testNumber, testStr );
-
-        const result = runTests( testStr );
-
-        if ( result.success ) {
-            // Check if the value and the corresponding log flag are present
-            if ( result.value.chars && config.chars.log ) {
-                log.chars( result.value.chars );
-            }
-            if ( result.value.lexer && config.tokens.log ) {
-                log.tokens( result.value.lexer );
-            }
-            if ( result.value.parser && config.cst.log ) {
-                log.cst( result.value.parser );
-            }
-        } else {
-            handleTestError( result.error );
+        
+        logger.testTitle( testNumber, testStr );
+        
+        try {
+            const results = runTest( testStr );
+            displayResults( results );
+        } catch ( e ) {
+            logger.error( e as Error );
         }
     }
+    
+    console.log( '\n' );
 };
 
 main();
-console.log( '\n' );
