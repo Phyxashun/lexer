@@ -1,112 +1,115 @@
-class Char {
-    // Java chars are 16-bit unsigned (0 to 65,535)
-    private _value: number;
+import { inspect, InspectOptions } from 'util';
 
-    constructor( initial: string | number = 0 ) {
-        if ( typeof initial === 'string' ) {
-            // Get code point of first character
-            this._value = initial.charCodeAt( 0 ) & 0xffff;
-        } else {
-            // Ensure value stays within 16-bit range (0-65535)
-            this._value = initial & 0xffff;
-        }
-    }
+export enum CharType {
+    // CharacterStream Control
+    EOF = 'EOF',
+    Error = 'Error',
+    Other = 'Other',
+    Undefined = 'Undefined',
 
-    /** Returns the numeric Unicode value (e.g., 65 for 'A') */
-    get value(): number {
-        return this._value;
-    }
+    // Whitespace & Formatting
+    Whitespace = 'Whitespace',
+    NewLine = 'NewLine',
 
-    /** Sets the value, enforcing 16-bit constraints */
-    set value( val: number ) {
-        this._value = val & 0xffff;
-    }
+    // Primary Literals
+    Letter = 'Letter',
+    Number = 'Number',
+    Hex = 'Hex',
 
-    /** Returns the string representation of the character */
-    toString(): string {
-        return String.fromCharCode( this._value );
-    }
+    // Quotes & Strings
+    SingleQuote = 'SingleQuote',
+    DoubleQuote = 'DoubleQuote',
+    Backtick = 'Backtick',
 
-    /** Simulation of Java's Character.isLetter() */
-    isLetter(): boolean {
-        return /[a-zA-Z]/.test( this.toString() );
-    }
+    // Brackets & Enclosures
+    LParen = 'LParen',
+    RParen = 'RParen',
+    LBracket = 'LBracket',
+    RBracket = 'RBracket',
+    LBrace = 'LBrace',
+    RBrace = 'RBrace',
 
-    /** Arithmetic simulation (e.g., char1++) */
-    increment(): void {
-        this._value = ( this._value + 1 ) & 0xffff;
-    }
+    // Common Operators & Mathematical
+    Plus = 'Plus',
+    Minus = 'Minus',
+    Star = 'Star',
+    Slash = 'Slash',
+    BackSlash = 'BackSlash',
+    EqualSign = 'EqualSign',
+    Percent = 'Percent',
+    Caret = 'Caret',
+    Tilde = 'Tilde',
+    Pipe = 'Pipe',
+    LessThan = 'LessThan',
+    GreaterThan = 'GreaterThan',
+
+    // Punctuation & Delimiters
+    Dot = 'Dot',
+    Comma = 'Comma',
+    Colon = 'Colon',
+    SemiColon = 'SemiColon',
+    Exclamation = 'Exclamation',
+    Question = 'Question',
+    Punctuation = 'Punctuation',
+
+    // Special Symbols & Identifiers
+    Hash = 'Hash',
+    At = 'At',
+    Ampersand = 'Ampersand',
+    Dollar = 'Dollar',
+    Underscore = 'Underscore',
+    Currency = 'Currency',
+    Symbol = 'Symbol',
+
+    // International / Multi-byte
+    Emoji = 'Emoji',
+    Unicode = 'Unicode',
 }
 
-// Usage examples
-const c1 = new Char( 'A' );
-console.log( c1.value ); // 65
-c1.increment();
-console.log( c1.toString() ); // "B"
-
-const c2 = new Char( 65535 ); // Max 16-bit value
-c2.increment();
-console.log( c2.value ); // 0 (simulates overflow)
-
-// Assuming your CharType and CharSpec are imported or defined above
-export class Char {
-    private _value: number;
-    private _type: CharType;
-
-    constructor( initial: string | number = 0 ) {
-        if ( typeof initial === 'string' ) {
-            this._value =
-                ( initial.length > 0 ? initial.charCodeAt( 0 ) : 0 ) & 0xffff;
-        } else {
-            this._value = initial & 0xffff;
-        }
-        // Determine type immediately on instantiation
-        this._type = this.determineType();
-    }
-
-    /**
-     * Iterates through the CharSpec map to find the first matching category.
-     * Returns CharType.Undefined if no specification matches.
-     */
-    private determineType(): CharType {
-        const charStr = this.toString();
-        for ( const [ type, isMatch ] of CharSpec ) {
-            if ( isMatch( charStr ) ) {
-                return type;
-            }
-        }
-        return CharType.Undefined;
-    }
-
-    /** Returns the detected CharType category */
-    get type(): CharType {
-        return this._type;
-    }
-
-    /** Returns the numeric Unicode value */
-    get value(): number {
-        return this._value;
-    }
-
-    /** Updates value and re-evaluates the character type */
-    set value( val: number ) {
-        this._value = val & 0xffff;
-        this._type = this.determineType();
-    }
-
-    toString(): string {
-        // Handle EOF specifically if it's outside standard 16-bit range
-        if ( this._value === 0xffff ) return 'EOF';
-        return String.fromCharCode( this._value );
-    }
-}
-
-// Example usage
-const digit = new Char( '5' );
-console.log( digit.type ); // CharType.Number
-
-const brace = new Char( '{' );
-console.log( brace.type ); // CharType.LBrace
+export const CharSpec = new Map<CharType, ( char: string ) => boolean>( [
+    [ CharType.EOF, ( char: string ) => char === EOF_STRING ],
+    [ CharType.NewLine, ( char: string ) => /[\n\r\u2028\u2029]/u.test( char ) ],
+    [ CharType.Whitespace, ( char: string ) => /[ \t\f\v\u2020]/u.test( char ) ],
+    [ CharType.Hash, ( char: string ) => char === '#' ],
+    [ CharType.Percent, ( char: string ) => char === '%' ],
+    [ CharType.Slash, ( char: string ) => char === '/' ],
+    [ CharType.Comma, ( char: string ) => char === ',' ],
+    [ CharType.LParen, ( char: string ) => char === '(' ],
+    [ CharType.RParen, ( char: string ) => char === ')' ],
+    [ CharType.Plus, ( char: string ) => char === '+' ],
+    [ CharType.Minus, ( char: string ) => char === '-' ],
+    [ CharType.Star, ( char: string ) => char === '*' ],
+    [ CharType.Dot, ( char: string ) => char === '.' ],
+    [ CharType.Backtick, ( char: string ) => char === '`' ],
+    [ CharType.SingleQuote, ( char: string ) => char === '\'' ],
+    [ CharType.DoubleQuote, ( char: string ) => char === '"' ],
+    [ CharType.BackSlash, ( char: string ) => char === '\\' ],
+    [ CharType.Tilde, ( char: string ) => char === '~' ],
+    [ CharType.Exclamation, ( char: string ) => char === '!' ],
+    [ CharType.At, ( char: string ) => char === '@' ],
+    [ CharType.Dollar, ( char: string ) => char === '$' ],
+    [ CharType.Question, ( char: string ) => char === '?' ],
+    [ CharType.Caret, ( char: string ) => char === '^' ],
+    [ CharType.Ampersand, ( char: string ) => char === '&' ],
+    [ CharType.LessThan, ( char: string ) => char === '<' ],
+    [ CharType.GreaterThan, ( char: string ) => char === '>' ],
+    [ CharType.Underscore, ( char: string ) => char === '_' ],
+    [ CharType.EqualSign, ( char: string ) => char === '=' ],
+    [ CharType.LBracket, ( char: string ) => char === '[' ],
+    [ CharType.RBracket, ( char: string ) => char === ']' ],
+    [ CharType.LBrace, ( char: string ) => char === '{' ],
+    [ CharType.RBrace, ( char: string ) => char === '}' ],
+    [ CharType.SemiColon, ( char: string ) => char === ';' ],
+    [ CharType.Colon, ( char: string ) => char === ':' ],
+    [ CharType.Pipe, ( char: string ) => char === '|' ],
+    [ CharType.Letter, ( char: string ) => /\p{L}/v.test( char ) ],
+    [ CharType.Number, ( char: string ) => /\p{N}/v.test( char ) ],
+    [ CharType.Emoji, ( char: string ) => /\p{Emoji}/v.test( char ) ],
+    [ CharType.Currency, ( char: string ) => /\p{Sc}/v.test( char ) ],
+    [ CharType.Punctuation, ( char: string ) => /\p{P}/v.test( char ) ],
+    [ CharType.Symbol, ( char: string ) => /\p{S}/v.test( char ) ],
+    [ CharType.Unicode, ( char: string ) => /\P{ASCII}/v.test( char ) ],
+] );
 
 export class Char {
     private static readonly CACHE = new Map<number, Char>();
@@ -142,66 +145,11 @@ export class Char {
     }
 
     private determineType(): CharType {
-        const charStr = String.fromCharCode( this._value );
-        for ( const [ type, isMatch ] of CharSpec ) {
-            if ( isMatch( charStr ) ) return type;
-        }
-        return CharType.Undefined;
-    }
-
-    get type(): CharType {
-        return this._type;
-    }
-    get value(): number {
-        return this._value;
-    }
-
-    toString(): string {
-        return String.fromCharCode( this._value );
-    }
-}
-
-// Usage
-const a1 = Char.valueOf( 'A' );
-const a2 = Char.valueOf( 65 );
-
-console.log( a1 === a2 ); // true (referenced from cache)
-console.log( a1.type ); // CharType.Letter
-
-export class Char {
-    // Java-style cache for the standard ASCII/Latin-1 range (0-255)
-    private static readonly CACHE: Char[] = new Array( 256 );
-
-    private readonly _value: number;
-    private readonly _type: CharType;
-
-    private constructor( val: number ) {
-        this._value = val & 0xffff;
-        this._type = this.determineType();
-    }
-
-    /**
-     * Factory method mimicking Java's Character.valueOf().
-     * Returns a cached instance for values 0-255.
-     */
-    public static valueOf( input: string | number ): Char {
-        const val =
-            ( typeof input === 'string' ? input.charCodeAt( 0 ) : input ) & 0xffff;
-
-        if ( val >= 0 && val <= 255 ) {
-            if ( !Char.CACHE[val] ) {
-                Char.CACHE[val] = new Char( val );
-            }
-            return Char.CACHE[val];
-        }
-
-        return new Char( val );
-    }
-
-    private determineType(): CharType {
-        const charStr = this.toString();
-        for ( const [ type, isMatch ] of CharSpec ) {
-            if ( isMatch( charStr ) ) return type;
+        const char = this.toString();
+        if ( char === undefined ) return CharType.Undefined;
+        if ( char === null ) return CharType.Error;
+        for ( const [ type, predicate ] of CharSpec ) {
+            if ( predicate( char ) ) return type;
         }
         return CharType.Undefined;
     }
@@ -217,69 +165,135 @@ export class Char {
         return String.fromCharCode( this._value );
     }
 
-    /** Helper for equality checks */
     public equals( other: Char ): boolean {
+        if ( this._value === 0xffff ) return 'EOF';
         return this._value === other.value;
+    }
+
+    /** Simulation of Java's Character.isLetter() */
+    isLetter(): boolean {
+        return /[a-zA-Z]/.test( this.toString() );
+    }
+
+    /** Arithmetic simulation (e.g., char1++) */
+    increment(): void {
+        this._value = ( this._value + 1 ) & 0xffff;
     }
 }
 
-// Logic check
-const charA1 = Char.valueOf( 'A' );
-const charA2 = Char.valueOf( 65 );
-const charB = Char.valueOf( 'B' );
+export class CharArray extends Float32Array {
 
-console.log( charA1 === charA2 ); // true (same reference from cache)
-console.log( charA1 === charB ); // false
-console.log( charA1.type ); // CharType.Letter
+    public static fromString( source: string ): CharArray {
+        const charArray = new CharArray( source.length );
+        for ( let i = 0; i < source.length; i++ ) {
+            // Populate buffer with ASCII/Unicode values
+            charArray[i] = source.charCodeAt( i ) & 0xffff;
+        }
+        return charArray;
+    }
+
+    public getChar( index: number ): Char {
+        if ( index < 0 || index >= this.length ) {
+            return Char.valueOf( 0xffff ); // Return EOF for out-of-bounds
+        }
+        // valueOf handles caching for ASCII (0-255)
+        return Char.valueOf( this[index] );
+    }
+
+    public toString(): string {
+        return Array.from( this )
+            .map( code => String.fromCharCode( code ) )
+            .join( '' );
+    }
+
+    public indexOfPattern( pattern: string | CharArray ): number {
+        const patternArr =
+            typeof pattern === 'string'
+                ? CharArray.fromString( pattern )
+                : pattern;
+
+        if ( patternArr.length === 0 ) return 0;
+
+        const lps = this.computeLPSArray( patternArr );
+        let i = 0; // index for this (text)
+        let j = 0; // index for patternArr
+
+        while ( i < this.length ) {
+            if ( patternArr[j] === this[i] ) {
+                i++;
+                j++;
+            }
+
+            if ( j === patternArr.length ) {
+                return i - j; // Match found
+            } else if ( i < this.length && patternArr[j] !== this[i] ) {
+                if ( j !== 0 ) {
+                    j = lps[j - 1];
+                } else {
+                    i++;
+                }
+            }
+        }
+
+        return -1; // No match
+    }
+
+    private computeLPSArray( pattern: CharArray ): Int32Array {
+        const lps = new Int32Array( pattern.length );
+        let len = 0;
+        let i = 1;
+
+        while ( i < pattern.length ) {
+            if ( pattern[i] === pattern[len] ) {
+                len++;
+                lps[i] = len;
+                i++;
+            } else {
+                if ( len !== 0 ) {
+                    len = lps[len - 1];
+                } else {
+                    lps[i] = 0;
+                    i++;
+                }
+            }
+        }
+        return lps;
+    }
+}
 
 export class CharacterStream {
     private position: number = 0;
-    private readonly input: string;
+    private buffer: CharArray;
 
     constructor( input: string ) {
-        this.input = input;
+        this.buffer = CharArray.fromString( input );
     }
 
-    /**
-     * Returns the next Char and advances the stream position.
-     * Returns a special EOF Char if at the end of the input.
-     */
     public next(): Char {
-        if ( this.isEOF() ) {
-            return Char.valueOf( 0xffff ); // Represent EOF as 65535
-        }
-        return Char.valueOf( this.input[this.position++] );
+        if ( this.isEOF() ) return Char.valueOf( 0xffff );
+        return this.buffer.getChar( this.position++ );
     }
 
-    /**
-     * Returns the Char at a specific offset from the current position
-     * without advancing the stream (defaults to 0 for current char).
-     */
     public peek( offset: number = 0 ): Char {
         const index = this.position + offset;
         if ( index >= this.input.length || index < 0 ) {
             return Char.valueOf( 0xffff );
         }
-        return Char.valueOf( this.input[index] );
+        return this.buffer.getChar( index );
     }
 
-    /** Checks if the stream has reached the end */
-    public isEOF(): boolean {
-        return this.position >= this.input.length;
+    public seek( position: number ): void {
+        this.position = Math.max( 0, Math.min( position, this.buffer.length ) );
     }
 
-    /** Returns current index in the input string */
     public getIndex(): number {
         return this.position;
     }
 
-    /** Resets the stream to the beginning or a specific point */
-    public seek( position: number ): void {
-        this.position = Math.max( 0, Math.min( position, this.input.length ) );
+    public isEOF(): boolean {
+        return this.position >= this.buffer.length;
     }
 }
-
-import { inspect, InspectOptions } from 'util';
 
 export class Lexer {
     public readonly [Symbol.toStringTag] = 'Token';
@@ -289,36 +303,9 @@ export class Lexer {
     private state: State = State.InitialState;
     private buffer = '';
 
-    constructor(
-        private chars: Char[],
-        private rawSource: string,
-    ) {
+    constructor( private chars: Char[], private rawSource: string ) {
         this.tokenize();
     }
-
-    /** Custom inspection for Node.js console.log */
-    [inspect.custom] = ( depth: number, options: InspectOptions ): string => {
-        const stylize = options.stylize;
-        if ( depth < 0 ) return stylize( this[Symbol.toStringTag], 'special' );
-
-        let output = `TOKENS (${this.tokens.length}):\n`;
-        this.tokens.forEach( ( token, i ) => {
-            const idx = stylize( `[${i.toString().padStart( 3, ' ' )}]`, 'number' );
-            const val = stylize(
-                `'${token.value.replace( /\n/g, '\\n' )}'`,
-                'string',
-            );
-            const type = stylize( `TokenType.${token.type}`, 'special' );
-            const span = token.span
-                ? stylize(
-                    `[L:${token.span.line}, C:${token.span.column}, len:${token.span.length}]`,
-                    'number',
-                )
-                : '';
-            output += ` ${idx} ${val.padEnd( 20 )} ${type.padEnd( 30 )} ${span}\n`;
-        } );
-        return output;
-    };
 
     private isEOF(): boolean {
         return this.pos >= this.chars.length;
@@ -439,6 +426,15 @@ export class Lexer {
 }
 
 export class Lexer {
+    private readonly message = {
+        accepted: `Accepted at ${this.state}`,
+        sync: 'Sync symbol',
+        invalidHex: 'Invalid hex color',
+        unexpectedChar: 'Unexpected character',
+        manualEOF: 'Manual EOF',
+        EOF: 'End of input',
+    };
+    
     public readonly [Symbol.toStringTag] = 'Token';
     public readonly tokens: Token[] = [];
 
@@ -446,7 +442,6 @@ export class Lexer {
     private state: State = State.InitialState;
     private buffer = '';
 
-    // Store the start of the current token attempt
     private startState = { pos: 0, line: 1, col: 1 };
 
     constructor( input: string ) {
@@ -454,10 +449,34 @@ export class Lexer {
         this.tokenize();
     }
 
+    /** Custom inspection for Node.js console.log */
+    [inspect.custom] = ( depth: number, options: InspectOptions ): string => {
+        const stylize = options.stylize;
+        if ( depth < 0 ) return stylize( this[Symbol.toStringTag], 'special' );
+
+        let output = `TOKENS (${this.tokens.length}):\n`;
+        this.tokens.forEach( ( token, i ) => {
+            const idx = stylize( `[${i.toString().padStart( 3, ' ' )}]`, 'number' );
+            const val = stylize(
+                `'${token.value.replace( /\n/g, '\\n' )}'`,
+                'string',
+            );
+            const type = stylize( `TokenType.${token.type}`, 'special' );
+            const span = token.span
+                ? stylize(
+                    `[L:${token.span.line}, C:${token.span.column}, len:${token.span.length}]`,
+                    'number',
+                )
+                : '';
+            output += ` ${idx} ${val.padEnd( 20 )} ${type.padEnd( 30 )} ${span}\n`;
+        } );
+        return output;
+    };
+
     private reset(): void {
         this.buffer = '';
         this.state = State.InitialState;
-        this.stream.mark(); // Mark current position for the next token's span
+        this.stream.mark();
         this.startState = {
             pos: this.stream.pos,
             line: this.stream.curLine,
@@ -478,37 +497,51 @@ export class Lexer {
             token = foldIdentifierToken( token );
         }
 
-        // Skip tokens like WHITESPACE if they are in the skip set
         if ( !typesToSkip.has( token.type ) ) {
             if ( this.buffer.length > 0 || type === TokenType.EOF ) {
                 this.tokens.push( token );
             }
         }
 
-        this.stream.release(); // Clean up the mark
+        this.stream.release();
         this.reset();
     }
 
-    private tokenize(): void {
-        this.reset(); // Initialize the first mark
+    private emitEOF(): void {
+        if ( this.state === State.EOF ) {
+            this.emit( TokenType.EOF, this.message.EOF );
+            return;
+        }
 
-        while ( !this.stream.isEOF() ) {
-            const ch = this.stream.peek();
-            const nextState = DFA[this.state]?.[ch.type];
+        if (
+            this.tokens.length === 0 ||
+            this.tokens[this.tokens.length - 1].type !== TokenType.EOF
+        ) {
+            this.emit( TokenType.EOF, this.message.manualEOF );
+            return;
+        }
+    }
+
+    private getNextState = ( type: CharType ): State => {
+        return DFA[ this.state ]?.[ type ];
+    };
+
+    private tokenize( ): void {
+        this.reset( );
+
+        while ( !this.stream.isEOF( ) ) {
+            const ch: Char = this.stream.peek( );
+            const nextState = this.getNextState( ch.type );
 
             if ( nextState === undefined ) {
                 const accept = ACCEPT[this.state];
                 if ( accept !== undefined ) {
-                    this.emit( accept, `Accepted at ${this.state}` );
-                } else if (
-                    this.state >= State.Hex1 &&
-                    this.state <= State.Hex8
-                ) {
-                    this.emit( TokenType.ERROR, 'Invalid hex color' );
+                    this.emit( accept, this.message.accepted );
+                } else if ( this.state >= State.Hex1 && this.state <= State.Hex8 ) {
+                    this.emit( TokenType.ERROR, this.message.invalidHex );
                 } else {
-                    // Unexpected char: consume it and emit error
                     this.buffer += this.stream.next().toString();
-                    this.emit( TokenType.ERROR, 'Unexpected character' );
+                    this.emit( TokenType.ERROR, this.message.unexpectedChar );
                 }
             } else {
                 this.state = nextState;
@@ -516,26 +549,20 @@ export class Lexer {
                 this.buffer += consumed.toString();
 
                 if ( this.state === State.EOF ) {
-                    this.emit( TokenType.EOF, 'End of input' );
+                    this.emitEOF();
                     break;
                 }
 
                 if ( this.state === State.SYNC ) {
                     this.emit(
                         charTokenMap[consumed.toString()] ?? TokenType.ERROR,
-                        'Sync symbol',
+                        this.message.sync,
                     );
                 }
             }
         }
 
-        // Finalize with EOF if necessary
-        if (
-            this.tokens.length === 0 ||
-            this.tokens[this.tokens.length - 1].type !== TokenType.EOF
-        ) {
-            this.emit( TokenType.EOF, 'Manual EOF' );
-        }
+        this.emitEOF();
     }
 }
 
@@ -606,124 +633,32 @@ export class ColorEvaluator {
     }
 }
 
-export class CharArray extends Float32Array {
-    /**
-     * Factory method to create a CharArray from a string.
-     * Each float in the underlying buffer stores a 16-bit character code.
-     */
-    public static fromString( source: string ): CharArray {
-        const charArray = new CharArray( source.length );
-        for ( let i = 0; i < source.length; i++ ) {
-            // Populate buffer with ASCII/Unicode values
-            charArray[i] = source.charCodeAt( i ) & 0xffff;
-        }
-        return charArray;
-    }
-
-    /**
-     * Returns the Char object at a specific index.
-     * This bridges the raw buffer back to your Char class logic.
-     */
-    public getChar( index: number ): Char {
-        if ( index < 0 || index >= this.length ) {
-            return Char.valueOf( 0xffff ); // Return EOF for out-of-bounds
-        }
-        // valueOf handles caching for ASCII (0-255)
-        return Char.valueOf( this[index] );
-    }
-
-    /** Utility to convert the buffer back to a standard string */
-    public toString(): string {
-        return Array.from( this )
-            .map( code => String.fromCharCode( code ) )
-            .join( '' );
-    }
-}
-
-export class CharacterStream {
-    private position: number = 0;
-    private buffer: CharArray;
-
-    constructor( input: string ) {
-        this.buffer = CharArray.fromString( input );
-    }
-
-    public next(): Char {
-        if ( this.isEOF() ) return Char.valueOf( 0xffff );
-        return this.buffer.getChar( this.position++ );
-    }
-
-    public peek( offset: number = 0 ): Char {
-        return this.buffer.getChar( this.position + offset );
-    }
-
-    public isEOF(): boolean {
-        return this.position >= this.buffer.length;
-    }
-}
-
-export class CharArray extends Float32Array {
-    // ... existing methods (fromString, getChar) ...
-
-    /**
-     * Finds the first occurrence of a pattern within the CharArray.
-     * @returns The starting index, or -1 if not found.
-     */
-    public indexOfPattern( pattern: string | CharArray ): number {
-        const patternArr =
-            typeof pattern === 'string'
-                ? CharArray.fromString( pattern )
-                : pattern;
-
-        if ( patternArr.length === 0 ) return 0;
-
-        const lps = this.computeLPSArray( patternArr );
-        let i = 0; // index for this (text)
-        let j = 0; // index for patternArr
-
-        while ( i < this.length ) {
-            if ( patternArr[j] === this[i] ) {
-                i++;
-                j++;
-            }
-
-            if ( j === patternArr.length ) {
-                return i - j; // Match found
-            } else if ( i < this.length && patternArr[j] !== this[i] ) {
-                if ( j !== 0 ) {
-                    j = lps[j - 1];
-                } else {
-                    i++;
-                }
-            }
-        }
-
-        return -1; // No match
-    }
-
-    /**
-     * Preprocesses the pattern to create the Longest Prefix Suffix (LPS) array.
-     * This table tells us how many characters we can skip after a mismatch.
-     */
-    private computeLPSArray( pattern: CharArray ): Int32Array {
-        const lps = new Int32Array( pattern.length );
-        let len = 0;
-        let i = 1;
-
-        while ( i < pattern.length ) {
-            if ( pattern[i] === pattern[len] ) {
-                len++;
-                lps[i] = len;
-                i++;
-            } else {
-                if ( len !== 0 ) {
-                    len = lps[len - 1];
-                } else {
-                    lps[i] = 0;
-                    i++;
-                }
-            }
-        }
-        return lps;
-    }
-}
+export const charTesting = () => {
+    // Usage examples
+    const a1 =      Char.valueOf( 'A' );
+    const a2 =      Char.valueOf( 65 );
+    const charA1 =  Char.valueOf( 'A' );
+    const charA2 =  Char.valueOf( 65 );
+    const charB =   Char.valueOf( 'B' );
+    const c1 =      Char.valueOf( 'A' );
+    const c2 =      Char.valueOf( 65535 ); // Max 16-bit value
+    const digit =   Char.valueOf( '5' );
+    const brace =   Char.valueOf( '{' );
+    
+    console.log( 'a1 === a2:', a1 === a2 );                 // true (referenced from cache)
+    console.log( 'a1.type:', a1.type );                     // CharType.Letter
+    
+    console.log( 'charA1 === charA2:', charA1 === charA2 ); // true (same reference from cache)
+    console.log( 'charA1 === charB:', charA1 === charB );   // false
+    console.log( 'charA1.type:', charA1.type );             // CharType.Letter
+    
+    console.log( 'c1.value:', c1.value );                   // 65
+    c1.increment();
+    console.log( 'c1.toString():', c1.toString() );         // "B"
+    
+    c2.increment();
+    console.log( 'c2.value:', c2.value );                   // 0 (simulates overflow)
+    
+    console.log( 'digit.type:', digit.type );               // CharType.Number
+    console.log( 'brace.type:', brace.type );               // CharType.LBrace
+};

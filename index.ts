@@ -15,7 +15,7 @@ const SPACER = ( n: number = 1 ) => '\u0020'.repeat( n );
 
 const config = {
     // OPTIONAL: SET THE LAST TEST NUMBER TO EXECUTE
-    lastTest: 46,
+    lastTest: 15,
 
     // CUSTOM INSPECT BREAKLENGTH
     options: { ...inspectOptions, breakLength: 80 } as InspectOptions,
@@ -120,17 +120,17 @@ const tests: Map<number, string> = new Map<number, string>( [
     [ 46, 'rgb(from red 255 b b)' ], // Absolute R, blue channel for green
 ] );
 
-const maybeStripEOF = <T>( value: T, shouldStrip: boolean ): T => {
+const maybeStripEOF = <T> ( value: T, shouldStrip: boolean ): T => {
     if ( !shouldStrip ) return value;
-    
+
     if ( Array.isArray( value ) ) {
         return value.slice( 0, -1 ) as T;
     }
-    
+
     if ( value instanceof Lexer && Array.isArray( value.tokens ) ) {
-        value.tokens = value.tokens.filter( t => t.type !== 'EOF' );
+        value.removeEOF();
     }
-    
+
     return value;
 };
 
@@ -139,47 +139,47 @@ const logger = {
         console.log( '\n' );
         BoxText( 'TESTING', { width: 'max', boxType: BoxType.light } );
     },
-    
+
     testTitle: ( num: number, str: string ) => {
-        const styledNum = styleText( [ 'blue', 'bold' ], `Test[${num}]` );
-        const styledStr = styleText( [ 'black', 'bgYellow' ], `"${str}"` );
+        const styledNum = styleText( [ 'blue', 'bold' ], `Test[${ num }]` );
+        const styledStr = styleText( [ 'black', 'bgYellow' ], `"${ str }"` );
         const label = styleText( [ 'yellow' ], 'Current Input' );
         console.log( '\n' );
-        BoxText( `${styledNum}: ${SPACER( 12 )}${label}: ${styledStr}`, { 
-            width: 'max', 
-            boxAlign: 'left' 
+        BoxText( `${ styledNum }: ${ SPACER( 12 ) }${ label }: ${ styledStr }`, {
+            width: 'max',
+            boxAlign: 'left'
         } );
     },
-    
+
     section: ( title: string, data: unknown, extraOptions = {} ) => {
-        console.log( `${title}:` );
+        console.log( `${ title }:` );
         console.log( inspect( data, { ...config.options, ...extraOptions } ) );
         if ( title !== 'CONCRETE SYNTAX TREE (CST)' ) console.log();
     },
-    
+
     error: ( e: Error ) => {
         const message = e instanceof LexerError ? '*** LEXING FAILED ***'
             : e instanceof ParseError ? '*** PARSING FAILED ***'
                 : '*** UNKNOWN FAILURE ***';
-        console.error( `\n${message}`, e.toString() );
+        console.error( `\n${ message }`, e.toString() );
     }
 };
 
 const runTest = ( testStr: string ): Results => {
     const results: Results = {};
-    
+
     if ( !config.chars.get ) throw new Error( 'Character processing disabled' );
     results.chars = Char.fromString( testStr );
-    
+
     if ( config.tokens.get ) results.lexer = new Lexer( results.chars, testStr );
-    
+
     if ( config.cst.get ) {
         if ( !results.lexer ) throw new Error( 'Lexer must be enabled to generate CST' );
-    
+
         results.parser = new Parser( results.lexer.tokens, testStr );
         results.parser.parse();
     }
-    
+
     return results;
 };
 
@@ -191,7 +191,7 @@ const displayResults = ( results: Results ): void => {
             { showPosition: config.display.pos }
         );
     }
-    
+
     if ( results.lexer && config.tokens.log ) {
         logger.section(
             'TOKENS',
@@ -202,7 +202,7 @@ const displayResults = ( results: Results ): void => {
             }
         );
     }
-    
+
     if ( results.parser && config.cst.log ) {
         logger.section(
             'CONCRETE SYNTAX TREE (CST)',
@@ -217,12 +217,12 @@ const displayResults = ( results: Results ): void => {
 
 const main = (): void => {
     logger.mainTitle();
-    
+
     for ( const [ testNumber, testStr ] of tests ) {
         if ( config.lastTest && testNumber >= config.lastTest ) break;
-        
+
         logger.testTitle( testNumber, testStr );
-        
+
         try {
             const results = runTest( testStr );
             displayResults( results );
@@ -230,7 +230,7 @@ const main = (): void => {
             logger.error( e as Error );
         }
     }
-    
+
     console.log( '\n' );
 };
 

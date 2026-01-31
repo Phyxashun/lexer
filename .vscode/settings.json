@@ -71,6 +71,7 @@
     //
     //------ TypeScript ------//
     "betterTypeScriptErrors.prettify": true,
+    "typescript.experimental.useTsgo": true,
     "typescript.format.enable": true,
     "typescript.format.semicolons": "insert",
     "typescript.preferences.quoteStyle": "single",
@@ -81,7 +82,7 @@
     "typescript.tsserver.useSyntaxServer": "always",
     "[typescript]": {
         "files.autoSave": "onFocusChange",
-        "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+        "editor.defaultFormatter": "vscode.typescript-language-features",
         "editor.foldingStrategy": "auto",
         "editor.wordWrap": "on"
     },
