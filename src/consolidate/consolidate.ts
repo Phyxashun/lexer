@@ -20,12 +20,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { globSync } from 'glob';
 import {
-    JobDefinition,
-    ConsolidationJob,
-    Configuration,
-    FinalSummaryOptions,
-} from './consolidate';
-import {
     LineType,
     BoxType,
     Spacer,
@@ -78,7 +72,7 @@ interface ConsolidationJob extends JobDefinition {
  * @typedef {Configuration}
  */
 interface Configuration {
-    GenerateJobs: (outputDir: string, extension: string) => ConsolidationJob[];
+    GenerateJobs: ( outputDir: string, extension: string ) => ConsolidationJob[];
     JOBS: ConsolidationJob[];
     IGNORELIST: string[];
 }
@@ -102,22 +96,22 @@ const JOB_DEFINITIONS: JobDefinition[] = [
     {
         name: 'MAIN',
         description: 'Main Project TypeScript and JavaScript Files',
-        patterns: ['src/*.{ts,js}', 'index.ts'],
+        patterns: [ 'src/*.{ts,js}', 'index.ts' ],
     },
     {
         name: 'CHAR',
         description: 'Char Project TypeScript and JavaScript Files',
-        patterns: ['src/char/**/*.{ts,js}'],
+        patterns: [ 'src/char/**/*.{ts,js}' ],
     },
     {
         name: 'LEXER',
         description: 'Lexer Project TypeScript and JavaScript Files',
-        patterns: ['src/lexer/**/*.{ts,js}'],
+        patterns: [ 'src/lexer/**/*.{ts,js}' ],
     },
     {
         name: 'PARSER',
         description: 'Parser Project TypeScript and JavaScript Files',
-        patterns: ['src/parser/**/*.{ts,js}'],
+        patterns: [ 'src/parser/**/*.{ts,js}' ],
     },
     {
         name: 'UTILS',
@@ -144,13 +138,18 @@ const JOB_DEFINITIONS: JobDefinition[] = [
     {
         name: 'TEST',
         description: 'Test Project TypeScript and JavaScript Files',
-        patterns: ['{test,tests}/**/*.test.ts'],
+        patterns: [ '{test,tests}/**/*.test.ts' ],
     },
     {
         name: 'MARKDOWN',
         description: 'Project Markdown Files',
-        patterns: ['0. NOTES/*', 'License', '*.md'],
+        patterns: [ '0. NOTES/*', 'License', '*.md' ],
     },
+    {
+        name: 'MYCONFIG',
+        description: 'Config Files',
+        patterns: [ 'myConfig/**/*.*' ],
+    }
 ];
 
 const CONFIG: Configuration = {
@@ -158,24 +157,24 @@ const CONFIG: Configuration = {
         outputDir: string,
         fileExtension: string,
     ): ConsolidationJob[] => {
-        return JOB_DEFINITIONS.map((definition, index) => ({
+        return JOB_DEFINITIONS.map( ( definition, index ) => ( {
             name: styleText(
-                ['red', 'underline'],
+                [ 'red', 'underline' ],
                 definition.description ?? definition.name,
             ),
 
-            outputFile: `${outputDir}${(index + 1).toString()}_ALL_${definition.name.toUpperCase().replace(' ', '_')}.${fileExtension}`,
+            outputFile: `${ outputDir }${ ( index + 1 ).toString() }_ALL_${ definition.name.toUpperCase().replace( ' ', '_' ) }.${ fileExtension }`,
 
             patterns: definition.patterns,
-        }));
+        } ) );
     },
     JOBS: [],
     IGNORELIST: [] as string[],
 };
 
 CONFIG.JOBS = [
-    ...CONFIG.GenerateJobs(TS_OUTPUT_DIR, 'ts'),
-    ...CONFIG.GenerateJobs(TEXT_OUTPUT_DIR, 'txt'),
+    ...CONFIG.GenerateJobs( TS_OUTPUT_DIR, 'ts' ),
+    ...CONFIG.GenerateJobs( TEXT_OUTPUT_DIR, 'txt' ),
 ];
 
 CONFIG.IGNORELIST = [
@@ -195,24 +194,24 @@ const ui = {
      * @returns {void}
      */
     displayHeader: (): void => {
-        PrintLine({ preNewLine: true, lineType: LineType.boldBlock });
+        PrintLine( { preNewLine: true, lineType: LineType.boldBlock } );
         console.log(
             styleText(
-                ['yellowBright', 'bold'],
-                CenteredFiglet(`Consolidate!!!`),
+                [ 'yellowBright', 'bold' ],
+                CenteredFiglet( 'Consolidate!!!' ),
             ),
         );
         CenteredText(
             styleText(
-                ['magentaBright', 'bold'],
+                [ 'magentaBright', 'bold' ],
                 '*** PROJECT FILE CONSOLIDATOR SCRIPT ***',
             ),
         );
-        PrintLine({
+        PrintLine( {
             preNewLine: true,
             postNewLine: true,
             lineType: LineType.boldBlock,
-        });
+        } );
     },
 
     /**
@@ -220,19 +219,19 @@ const ui = {
      * @param {string} description - The name of the job being processed.
      * @param {string} outputFile - The path of the output file for the job.
      */
-    logJobStart: (description: string, outputFile: string): void => {
+    logJobStart: ( description: string, outputFile: string ): void => {
         CenteredText(
-            styleText('cyan', `Consolidating all project ${description}`),
+            styleText( 'cyan', `Consolidating all project ${ description }` ),
         );
-        CenteredText(styleText('cyan', `files into ${outputFile}...\n`));
+        CenteredText( styleText( 'cyan', `files into ${ outputFile }...\n` ) );
     },
 
     /**
      * Logs the path of a file being appended to an output file.
      * @param {string} filePath - The path of the file being appended.
      */
-    logFileAppend: (filePath: string): void => {
-        console.log(styleText('blue', `\tAppending:`), filePath);
+    logFileAppend: ( filePath: string ): void => {
+        console.log( styleText( 'blue', '\tAppending:' ), filePath );
     },
 
     /**
@@ -240,12 +239,12 @@ const ui = {
      */
     logComplete: (): void => {
         console.log();
-        CenteredText(styleText(['green', 'bold'], 'Consolidation complete!!!'));
-        PrintLine({
+        CenteredText( styleText( [ 'green', 'bold' ], 'Consolidation complete!!!' ) );
+        PrintLine( {
             preNewLine: true,
             postNewLine: true,
             lineType: LineType.boldBlock,
-        });
+        } );
     },
 
     /**
@@ -253,22 +252,22 @@ const ui = {
      * @param {number} fileCount - The total number of files consolidated.
      * @param {number} jobCount - The total number of jobs processed.
      */
-    logFinalSummary: (options: FinalSummaryOptions): void => {
+    logFinalSummary: ( options: FinalSummaryOptions ): void => {
         const { totalFiles, processedJobs, skippedJobs } = options;
-        let summaryMessage = `✓ Successfully consolidated ${totalFiles.toString()} files across ${processedJobs.toString()} jobs.`;
-        if (skippedJobs > 0) {
-            summaryMessage += ` (${skippedJobs.toString()} jobs skipped).`;
+        let summaryMessage = `✓ Successfully consolidated ${ totalFiles.toString() } files across ${ processedJobs.toString() } jobs.`;
+        if ( skippedJobs > 0 ) {
+            summaryMessage += ` (${ skippedJobs.toString() } jobs skipped).`;
         }
-        BoxText(summaryMessage, {
+        BoxText( summaryMessage, {
             boxType: BoxType.double,
             color: 'green',
-            textColor: ['green', 'bold'],
-        });
-        PrintLine({
+            textColor: [ 'green', 'bold' ],
+        } );
+        PrintLine( {
             preNewLine: true,
             postNewLine: true,
             lineType: LineType.boldBlock,
-        });
+        } );
     },
 };
 
@@ -280,12 +279,12 @@ const fileSystem = {
      * Ensures that a directory exists, creating it if necessary.
      * @param {string} dirPath - The path to the directory to create.
      */
-    ensureDirectoryExists: (dirPath: string): void => {
-        if (!fs.existsSync(dirPath)) {
+    ensureDirectoryExists: ( dirPath: string ): void => {
+        if ( !fs.existsSync( dirPath ) ) {
             CenteredText(
-                styleText(['yellow', 'bold'], `Creating directory: ${dirPath}`),
+                styleText( [ 'yellow', 'bold' ], `Creating directory: ${ dirPath }` ),
             );
-            fs.mkdirSync(dirPath, { recursive: true });
+            fs.mkdirSync( dirPath, { recursive: true } );
         }
     },
 
@@ -293,12 +292,12 @@ const fileSystem = {
      * Ensures an output file is empty by deleting it if it already exists.
      * @param {string} filePath - The path to the output file to prepare.
      */
-    prepareOutputFile: (filePath: string): void => {
+    prepareOutputFile: ( filePath: string ): void => {
         // Extract directory path and ensure it exists
-        const dirPath = path.dirname(filePath);
-        fileSystem.ensureDirectoryExists(dirPath);
-        if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
+        const dirPath = path.dirname( filePath );
+        fileSystem.ensureDirectoryExists( dirPath );
+        if ( fs.existsSync( filePath ) ) {
+            fs.unlinkSync( filePath );
         }
     },
 
@@ -309,10 +308,10 @@ const fileSystem = {
      * @param {string[]} [ignorePatterns] - An optional array of glob patterns to ignore files.
      * @returns {Promise<string[]>} A promise that resolves to an array of found file paths.
      */
-    findFiles: (patterns: string[], outputFile: string): string[] => {
-        return globSync(patterns, {
-            ignore: [...CONFIG.IGNORELIST, outputFile],
-        });
+    findFiles: ( patterns: string[], outputFile: string ): string[] => {
+        return globSync( patterns, {
+            ignore: [ ...CONFIG.IGNORELIST, outputFile ],
+        } );
     },
 
     /**
@@ -320,15 +319,15 @@ const fileSystem = {
      * @param {string} sourceFile - The path of the source file to process.
      * @returns {Promise<string>} A promise that resolves to the formatted file content as a string.
      */
-    createFileContent: async (sourceFile: string): Promise<string> => {
-        const space = Spacer(START_END_SPACER, '■');
-        const endLine = Spacer(START_END_NEWLINE, '\n');
-        const divider = Spacer(FILE_DIVIDER_WIDTH, '█');
-        const fileDivider = `//${divider}\n`;
-        const startFile = `${endLine}//${space} Start of file: ${sourceFile} ${space}${endLine}${endLine}\n`;
-        const content = await Bun.file(sourceFile).text();
-        const endFile = `\n${endLine}${endLine}//${space} End of file: ${sourceFile} ${space}${endLine}\n`;
-        return `${startFile}${content}${endFile}${fileDivider}${fileDivider}`;
+    createFileContent: async ( sourceFile: string ): Promise<string> => {
+        const space = Spacer( START_END_SPACER, '■' );
+        const endLine = Spacer( START_END_NEWLINE, '\n' );
+        const divider = Spacer( FILE_DIVIDER_WIDTH, '█' );
+        const fileDivider = `//${ divider }\n`;
+        const startFile = `${ endLine }//${ space } Start of file: ${ sourceFile } ${ space }${ endLine }${ endLine }\n`;
+        const content = await Bun.file( sourceFile ).text();
+        const endFile = `\n${ endLine }${ endLine }//${ space } End of file: ${ sourceFile } ${ space }${ endLine }\n`;
+        return `${ startFile }${ content }${ endFile }${ fileDivider }${ fileDivider }`;
     },
 };
 
@@ -343,19 +342,19 @@ const consolidateJobs = {
      * @param {ConsolidationJob} job - The consolidation job to execute.
      * @returns {Promise<number>} The number of files processed in the job.
      */
-    process: async (job: ConsolidationJob): Promise<number> => {
+    process: async ( job: ConsolidationJob ): Promise<number> => {
         const { name, outputFile, patterns } = job;
-        const sourceFiles = fileSystem.findFiles(patterns, outputFile);
-        if (sourceFiles.length > 0) {
-            ui.logJobStart(name, outputFile);
-            fileSystem.prepareOutputFile(outputFile);
+        const sourceFiles = fileSystem.findFiles( patterns, outputFile );
+        if ( sourceFiles.length > 0 ) {
+            ui.logJobStart( name, outputFile );
+            fileSystem.prepareOutputFile( outputFile );
             const allContent: string[] = [];
-            for (const sourceFile of sourceFiles) {
-                ui.logFileAppend(sourceFile);
-                const content = await fileSystem.createFileContent(sourceFile);
-                allContent.push(content);
+            for ( const sourceFile of sourceFiles ) {
+                ui.logFileAppend( sourceFile );
+                const content = await fileSystem.createFileContent( sourceFile );
+                allContent.push( content );
             }
-            fs.writeFileSync(outputFile, allContent.join(''));
+            fs.writeFileSync( outputFile, allContent.join( '' ) );
             ui.logComplete();
             return sourceFiles.length;
         }
@@ -366,22 +365,22 @@ const consolidateJobs = {
      * Runs all consolidation jobs, tracks the total files processed, and logs a final summary.
      * @param {CONFIG.ConsolidationJob[]} jobs - An array of consolidation jobs to execute.
      */
-    run: async (jobs: ConsolidationJob[]): Promise<void> => {
+    run: async ( jobs: ConsolidationJob[] ): Promise<void> => {
         let totalFiles = 0;
         let processedJobs = 0;
         let skippedJobs = 0; // --- 5. Add counter for skipped jobs ---
-        for (const job of jobs) {
-            const fileCountForJob = await consolidateJobs.process(job);
-            if (fileCountForJob > 0) {
+        for ( const job of jobs ) {
+            const fileCountForJob = await consolidateJobs.process( job );
+            if ( fileCountForJob > 0 ) {
                 totalFiles += fileCountForJob;
                 processedJobs++;
             } else {
                 skippedJobs++; // --- 6. Increment if job returned 0 files ---
             }
         }
-        if (totalFiles > 0) {
+        if ( totalFiles > 0 ) {
             // --- 7. Pass all counts to the summary function ---
-            ui.logFinalSummary({ totalFiles, processedJobs, skippedJobs });
+            ui.logFinalSummary( { totalFiles, processedJobs, skippedJobs } );
         }
     },
 };
@@ -393,7 +392,7 @@ const consolidateJobs = {
  */
 export const main = async (): Promise<void> => {
     ui.displayHeader();
-    await consolidateJobs.run(CONFIG.JOBS);
+    await consolidateJobs.run( CONFIG.JOBS );
 };
 
 // Executes and exports the script.
