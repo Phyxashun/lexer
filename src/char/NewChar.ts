@@ -118,7 +118,7 @@ export class Char {
     private readonly _type: CharType;
 
     // Private constructor to force use of Char.valueOf()
-    private constructor( val: number ) {
+    private constructor ( val: number ) {
         this._value = val & 0xffff;
         this._type = this.determineType();
     }
@@ -127,7 +127,7 @@ export class Char {
      * Static Factory Method (similar to Java's Character.valueOf)
      * Reuses instances for values 0-255 (ASCII/Latin-1) and common operators.
      */
-    public static valueOf( input: string | number ): Char {
+    public static valueOf ( input: string | number ): Char {
         const val =
             ( typeof input === 'string' ? input.charCodeAt( 0 ) : input ) & 0xffff;
 
@@ -144,7 +144,7 @@ export class Char {
         return new Char( val );
     }
 
-    private determineType(): CharType {
+    private determineType (): CharType {
         const char = this.toString();
         if ( char === undefined ) return CharType.Undefined;
         if ( char === null ) return CharType.Error;
@@ -154,59 +154,59 @@ export class Char {
         return CharType.Undefined;
     }
 
-    get value(): number {
+    get value (): number {
         return this._value;
     }
-    get type(): CharType {
+    get type (): CharType {
         return this._type;
     }
 
-    public toString(): string {
+    public toString (): string {
         return String.fromCharCode( this._value );
     }
 
-    public equals( other: Char ): boolean {
+    public equals ( other: Char ): boolean {
         if ( this._value === 0xffff ) return 'EOF';
         return this._value === other.value;
     }
 
     /** Simulation of Java's Character.isLetter() */
-    isLetter(): boolean {
+    isLetter (): boolean {
         return /[a-zA-Z]/.test( this.toString() );
     }
 
     /** Arithmetic simulation (e.g., char1++) */
-    increment(): void {
+    increment (): void {
         this._value = ( this._value + 1 ) & 0xffff;
     }
 }
 
 export class CharArray extends Float32Array {
 
-    public static fromString( source: string ): CharArray {
+    public static fromString ( source: string ): CharArray {
         const charArray = new CharArray( source.length );
         for ( let i = 0; i < source.length; i++ ) {
             // Populate buffer with ASCII/Unicode values
-            charArray[i] = source.charCodeAt( i ) & 0xffff;
+            charArray[ i ] = source.charCodeAt( i ) & 0xffff;
         }
         return charArray;
     }
 
-    public getChar( index: number ): Char {
+    public getChar ( index: number ): Char {
         if ( index < 0 || index >= this.length ) {
             return Char.valueOf( 0xffff ); // Return EOF for out-of-bounds
         }
         // valueOf handles caching for ASCII (0-255)
-        return Char.valueOf( this[index] );
+        return Char.valueOf( this[ index ] );
     }
 
-    public toString(): string {
+    public toString (): string {
         return Array.from( this )
             .map( code => String.fromCharCode( code ) )
             .join( '' );
     }
 
-    public indexOfPattern( pattern: string | CharArray ): number {
+    public indexOfPattern ( pattern: string | CharArray ): number {
         const patternArr =
             typeof pattern === 'string'
                 ? CharArray.fromString( pattern )
@@ -219,16 +219,16 @@ export class CharArray extends Float32Array {
         let j = 0; // index for patternArr
 
         while ( i < this.length ) {
-            if ( patternArr[j] === this[i] ) {
+            if ( patternArr[ j ] === this[ i ] ) {
                 i++;
                 j++;
             }
 
             if ( j === patternArr.length ) {
                 return i - j; // Match found
-            } else if ( i < this.length && patternArr[j] !== this[i] ) {
+            } else if ( i < this.length && patternArr[ j ] !== this[ i ] ) {
                 if ( j !== 0 ) {
-                    j = lps[j - 1];
+                    j = lps[ j - 1 ];
                 } else {
                     i++;
                 }
@@ -238,21 +238,21 @@ export class CharArray extends Float32Array {
         return -1; // No match
     }
 
-    private computeLPSArray( pattern: CharArray ): Int32Array {
+    private computeLPSArray ( pattern: CharArray ): Int32Array {
         const lps = new Int32Array( pattern.length );
         let len = 0;
         let i = 1;
 
         while ( i < pattern.length ) {
-            if ( pattern[i] === pattern[len] ) {
+            if ( pattern[ i ] === pattern[ len ] ) {
                 len++;
-                lps[i] = len;
+                lps[ i ] = len;
                 i++;
             } else {
                 if ( len !== 0 ) {
-                    len = lps[len - 1];
+                    len = lps[ len - 1 ];
                 } else {
-                    lps[i] = 0;
+                    lps[ i ] = 0;
                     i++;
                 }
             }
@@ -265,16 +265,16 @@ export class CharacterStream {
     private position: number = 0;
     private buffer: CharArray;
 
-    constructor( input: string ) {
+    constructor ( input: string ) {
         this.buffer = CharArray.fromString( input );
     }
 
-    public next(): Char {
+    public next (): Char {
         if ( this.isEOF() ) return Char.valueOf( 0xffff );
         return this.buffer.getChar( this.position++ );
     }
 
-    public peek( offset: number = 0 ): Char {
+    public peek ( offset: number = 0 ): Char {
         const index = this.position + offset;
         if ( index >= this.input.length || index < 0 ) {
             return Char.valueOf( 0xffff );
@@ -282,47 +282,47 @@ export class CharacterStream {
         return this.buffer.getChar( index );
     }
 
-    public seek( position: number ): void {
+    public seek ( position: number ): void {
         this.position = Math.max( 0, Math.min( position, this.buffer.length ) );
     }
 
-    public getIndex(): number {
+    public getIndex (): number {
         return this.position;
     }
 
-    public isEOF(): boolean {
+    public isEOF (): boolean {
         return this.position >= this.buffer.length;
     }
 }
 
 export class Lexer {
-    public readonly [Symbol.toStringTag] = 'Token';
+    public readonly [ Symbol.toStringTag ] = 'Token';
     public readonly tokens: Token[] = [];
     private pos = 0;
     private start = 0;
     private state: State = State.InitialState;
     private buffer = '';
 
-    constructor( private chars: Char[], private rawSource: string ) {
+    constructor ( private chars: Char[], private rawSource: string ) {
         this.tokenize();
     }
 
-    private isEOF(): boolean {
+    private isEOF (): boolean {
         return this.pos >= this.chars.length;
     }
 
-    private reset(): void {
+    private reset (): void {
         this.buffer = '';
         this.start = this.pos;
         this.state = State.InitialState;
     }
 
-    private peek(): Char {
+    private peek (): Char {
         // Return an EOF Char if out of bounds
-        return this.chars[this.pos] || Char.valueOf( 0xffff );
+        return this.chars[ this.pos ] || Char.valueOf( 0xffff );
     }
 
-    private advance(): Char {
+    private advance (): Char {
         const char = this.peek();
         if ( !this.isEOF() ) {
             this.buffer += char.toString();
@@ -331,8 +331,8 @@ export class Lexer {
         return char;
     }
 
-    private createSpan( startPos: number, endPos: number ): Span {
-        const startChar = this.chars[startPos];
+    private createSpan ( startPos: number, endPos: number ): Span {
+        const startChar = this.chars[ startPos ];
         // Using the .span property we added to the Char class in the previous step
         if ( !startChar || !startChar.span ) {
             return {
@@ -351,7 +351,7 @@ export class Lexer {
         };
     }
 
-    private createToken( type: TokenType, message?: string ): Token {
+    private createToken ( type: TokenType, message?: string ): Token {
         return {
             value: this.buffer,
             type,
@@ -360,7 +360,7 @@ export class Lexer {
         };
     }
 
-    private emit( type: TokenType, message?: string ): void {
+    private emit ( type: TokenType, message?: string ): void {
         let token: Token = this.createToken( type, message );
 
         // Custom fold logic (e.g., distinguishing 'function' keyword from identifiers)
@@ -381,15 +381,15 @@ export class Lexer {
         this.reset();
     }
 
-    private tokenize(): void {
+    private tokenize (): void {
         while ( !this.isEOF() ) {
             const ch = this.peek();
-            const nextState = DFA[this.state]?.[ch.type];
+            const nextState = DFA[ this.state ]?.[ ch.type ];
 
             if ( nextState === undefined ) {
-                const accept = ACCEPT[this.state];
+                const accept = ACCEPT[ this.state ];
                 if ( accept !== undefined ) {
-                    this.emit( accept, `Accepted at ${this.state}` );
+                    this.emit( accept, `Accepted at ${ this.state }` );
                 } else if (
                     this.state >= State.Hex1 &&
                     this.state <= State.Hex8
@@ -418,7 +418,7 @@ export class Lexer {
         // Ensure stream always ends with EOF
         if (
             this.tokens.length === 0 ||
-            this.tokens[this.tokens.length - 1].type !== TokenType.EOF
+            this.tokens[ this.tokens.length - 1 ].type !== TokenType.EOF
         ) {
             this.emit( TokenType.EOF, 'Manual EOF' );
         }
@@ -427,15 +427,15 @@ export class Lexer {
 
 export class Lexer {
     private readonly message = {
-        accepted: `Accepted at ${this.state}`,
+        accepted: `Accepted at ${ this.state }`,
         sync: 'Sync symbol',
         invalidHex: 'Invalid hex color',
         unexpectedChar: 'Unexpected character',
         manualEOF: 'Manual EOF',
         EOF: 'End of input',
     };
-    
-    public readonly [Symbol.toStringTag] = 'Token';
+
+    public readonly [ Symbol.toStringTag ] = 'Token';
     public readonly tokens: Token[] = [];
 
     private stream: CharacterStream;
@@ -444,36 +444,36 @@ export class Lexer {
 
     private startState = { pos: 0, line: 1, col: 1 };
 
-    constructor( input: string ) {
+    constructor ( input: string ) {
         this.stream = new CharacterStream( input );
         this.tokenize();
     }
 
     /** Custom inspection for Node.js console.log */
-    [inspect.custom] = ( depth: number, options: InspectOptions ): string => {
+    [ inspect.custom ] = ( depth: number, options: InspectOptions ): string => {
         const stylize = options.stylize;
-        if ( depth < 0 ) return stylize( this[Symbol.toStringTag], 'special' );
+        if ( depth < 0 ) return stylize( this[ Symbol.toStringTag ], 'special' );
 
-        let output = `TOKENS (${this.tokens.length}):\n`;
+        let output = `TOKENS (${ this.tokens.length }):\n`;
         this.tokens.forEach( ( token, i ) => {
-            const idx = stylize( `[${i.toString().padStart( 3, ' ' )}]`, 'number' );
+            const idx = stylize( `[${ i.toString().padStart( 3, ' ' ) }]`, 'number' );
             const val = stylize(
-                `'${token.value.replace( /\n/g, '\\n' )}'`,
+                `'${ token.value.replace( /\n/g, '\\n' ) }'`,
                 'string',
             );
-            const type = stylize( `TokenType.${token.type}`, 'special' );
+            const type = stylize( `TokenType.${ token.type }`, 'special' );
             const span = token.span
                 ? stylize(
-                    `[L:${token.span.line}, C:${token.span.column}, len:${token.span.length}]`,
+                    `[L:${ token.span.line }, C:${ token.span.column }, len:${ token.span.length }]`,
                     'number',
                 )
                 : '';
-            output += ` ${idx} ${val.padEnd( 20 )} ${type.padEnd( 30 )} ${span}\n`;
+            output += ` ${ idx } ${ val.padEnd( 20 ) } ${ type.padEnd( 30 ) } ${ span }\n`;
         } );
         return output;
     };
 
-    private reset(): void {
+    private reset (): void {
         this.buffer = '';
         this.state = State.InitialState;
         this.stream.mark();
@@ -484,7 +484,7 @@ export class Lexer {
         };
     }
 
-    private emit( type: TokenType, message?: string ): void {
+    private emit ( type: TokenType, message?: string ): void {
         const span = this.stream.captureFromMark();
         let token: Token = {
             value: this.buffer,
@@ -507,7 +507,7 @@ export class Lexer {
         this.reset();
     }
 
-    private emitEOF(): void {
+    private emitEOF (): void {
         if ( this.state === State.EOF ) {
             this.emit( TokenType.EOF, this.message.EOF );
             return;
@@ -515,7 +515,7 @@ export class Lexer {
 
         if (
             this.tokens.length === 0 ||
-            this.tokens[this.tokens.length - 1].type !== TokenType.EOF
+            this.tokens[ this.tokens.length - 1 ].type !== TokenType.EOF
         ) {
             this.emit( TokenType.EOF, this.message.manualEOF );
             return;
@@ -526,15 +526,15 @@ export class Lexer {
         return DFA[ this.state ]?.[ type ];
     };
 
-    private tokenize( ): void {
-        this.reset( );
+    private tokenize (): void {
+        this.reset();
 
-        while ( !this.stream.isEOF( ) ) {
-            const ch: Char = this.stream.peek( );
+        while ( !this.stream.isEOF() ) {
+            const ch: Char = this.stream.peek();
             const nextState = this.getNextState( ch.type );
 
             if ( nextState === undefined ) {
-                const accept = ACCEPT[this.state];
+                const accept = ACCEPT[ this.state ];
                 if ( accept !== undefined ) {
                     this.emit( accept, this.message.accepted );
                 } else if ( this.state >= State.Hex1 && this.state <= State.Hex8 ) {
@@ -555,7 +555,7 @@ export class Lexer {
 
                 if ( this.state === State.SYNC ) {
                     this.emit(
-                        charTokenMap[consumed.toString()] ?? TokenType.ERROR,
+                        charTokenMap[ consumed.toString() ] ?? TokenType.ERROR,
                         this.message.sync,
                     );
                 }
@@ -568,7 +568,7 @@ export class Lexer {
 
 export class ColorEvaluator {
     /** Main evaluation entry point */
-    public evaluate( node: ASTNode ): string {
+    public evaluate ( node: ASTNode ): string {
         switch ( node.type ) {
             case 'ColorFunction':
                 return this.evaluateFunction( node );
@@ -578,26 +578,26 @@ export class ColorEvaluator {
                 return node.value; // Return keyword as-is
             default:
                 throw new Error(
-                    `Cannot evaluate standalone numeric node: ${node.type}`,
+                    `Cannot evaluate standalone numeric node: ${ node.type }`,
                 );
         }
     }
 
-    private evaluateFunction( node: ColorFunctionNode ): string {
+    private evaluateFunction ( node: ColorFunctionNode ): string {
         // Evaluate the main color channels (R, G, B)
-        const r = this.getNumericValue( node.args[0], 255 );
-        const g = this.getNumericValue( node.args[1], 255 );
-        const b = this.getNumericValue( node.args[2], 255 );
+        const r = this.getNumericValue( node.args[ 0 ], 255 );
+        const g = this.getNumericValue( node.args[ 1 ], 255 );
+        const b = this.getNumericValue( node.args[ 2 ], 255 );
 
         // Evaluate alpha (default to 1 if not present)
         const a = node.alpha ? this.getNumericValue( node.alpha, 1 ) : 1;
 
         // Return a standard browser-compatible string
-        return `rgba(${r}, ${g}, ${b}, ${a})`;
+        return `rgba(${ r }, ${ g }, ${ b }, ${ a })`;
     }
 
     /** Helper to normalize and clamp values from the AST */
-    private getNumericValue( node: ASTNode, max: number ): number {
+    private getNumericValue ( node: ASTNode, max: number ): number {
         if ( node.type === 'Number' ) {
             return this.clamp( node.value, 0, max );
         }
@@ -608,25 +608,25 @@ export class ColorEvaluator {
         return 0;
     }
 
-    private clamp( val: number, min: number, max: number ): number {
+    private clamp ( val: number, min: number, max: number ): number {
         return Math.min( Math.max( val, min ), max );
     }
 
     /** Transpiles the AST to an 8-digit Hex value (#rrggbbaa) */
-    public toHex( node: ASTNode ): string {
+    public toHex ( node: ASTNode ): string {
         if ( node.type === 'HexColor' ) return node.value;
 
         // For functions, evaluate to RGBA first
         if ( node.type === 'ColorFunction' ) {
-            const r = Math.round( this.getNumericValue( node.args[0], 255 ) );
-            const g = Math.round( this.getNumericValue( node.args[1], 255 ) );
-            const b = Math.round( this.getNumericValue( node.args[2], 255 ) );
+            const r = Math.round( this.getNumericValue( node.args[ 0 ], 255 ) );
+            const g = Math.round( this.getNumericValue( node.args[ 1 ], 255 ) );
+            const b = Math.round( this.getNumericValue( node.args[ 2 ], 255 ) );
             const a = Math.round(
                 ( node.alpha ? this.getNumericValue( node.alpha, 1 ) : 1 ) * 255,
             );
 
             const toHex = ( n: number ) => n.toString( 16 ).padStart( 2, '0' );
-            return `#${toHex( r )}${toHex( g )}${toHex( b )}${toHex( a )}`;
+            return `#${ toHex( r ) }${ toHex( g ) }${ toHex( b ) }${ toHex( a ) }`;
         }
 
         return '#000000ff'; // Fallback
@@ -635,30 +635,30 @@ export class ColorEvaluator {
 
 export const charTesting = () => {
     // Usage examples
-    const a1 =      Char.valueOf( 'A' );
-    const a2 =      Char.valueOf( 65 );
-    const charA1 =  Char.valueOf( 'A' );
-    const charA2 =  Char.valueOf( 65 );
-    const charB =   Char.valueOf( 'B' );
-    const c1 =      Char.valueOf( 'A' );
-    const c2 =      Char.valueOf( 65535 ); // Max 16-bit value
-    const digit =   Char.valueOf( '5' );
-    const brace =   Char.valueOf( '{' );
-    
+    const a1 = Char.valueOf( 'A' );
+    const a2 = Char.valueOf( 65 );
+    const charA1 = Char.valueOf( 'A' );
+    const charA2 = Char.valueOf( 65 );
+    const charB = Char.valueOf( 'B' );
+    const c1 = Char.valueOf( 'A' );
+    const c2 = Char.valueOf( 65535 ); // Max 16-bit value
+    const digit = Char.valueOf( '5' );
+    const brace = Char.valueOf( '{' );
+
     console.log( 'a1 === a2:', a1 === a2 );                 // true (referenced from cache)
     console.log( 'a1.type:', a1.type );                     // CharType.Letter
-    
+
     console.log( 'charA1 === charA2:', charA1 === charA2 ); // true (same reference from cache)
     console.log( 'charA1 === charB:', charA1 === charB );   // false
     console.log( 'charA1.type:', charA1.type );             // CharType.Letter
-    
+
     console.log( 'c1.value:', c1.value );                   // 65
     c1.increment();
     console.log( 'c1.toString():', c1.toString() );         // "B"
-    
+
     c2.increment();
     console.log( 'c2.value:', c2.value );                   // 0 (simulates overflow)
-    
+
     console.log( 'digit.type:', digit.type );               // CharType.Number
     console.log( 'brace.type:', brace.type );               // CharType.LBrace
 };
