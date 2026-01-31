@@ -15,7 +15,7 @@ const SPACER = ( n: number = 1 ) => '\u0020'.repeat( n );
 
 const config = {
     // OPTIONAL: SET THE LAST TEST NUMBER TO EXECUTE
-    lastTest: 15,
+    lastTest: 46,
 
     // CUSTOM INSPECT BREAKLENGTH
     options: { ...inspectOptions, breakLength: 80 } as InspectOptions,
