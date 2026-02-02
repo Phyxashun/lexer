@@ -41,9 +41,7 @@
     "editor.autoIndent": "full",
     "editor.wordWrap": "bounded",
     "editor.wordWrapColumn": 120,
-    "editor.rulers": [
-        120
-    ],
+    "editor.rulers": [120],
     "editor.semanticHighlighting.enabled": true,
     "editor.semanticTokenColorCustomizations": {
         "enabled": true
@@ -234,9 +232,7 @@
     "indentRainbow.lightIndicatorStyleLineWidth": 1,
     "indentRainbow.colorOnWhiteSpaceOnly": true,
     "indentRainbow.updateDelay": 100,
-    "indentRainbow.ignoreErrorLanguages": [
-        "haskell"
-    ],
+    "indentRainbow.ignoreErrorLanguages": ["haskell"],
     "indentRainbow.errorColor": "rgba(128,32,32,0.6)",
     "indentRainbow.tabmixColor": "rgba(128,32,96,0.6)",
     "indentRainbow.colors": [
@@ -261,8 +257,5 @@
     "[editorconfig]": {
         "editor.defaultFormatter": "EditorConfig.EditorConfig"
     },
-    "typescript.tsdk": "node_modules/typescript/lib",
-    "[powershell]": {
-        "editor.defaultFormatter": "ms-vscode.powershell"
-    }
+    "typescript.tsdk": "node_modules/typescript/lib"
 }
