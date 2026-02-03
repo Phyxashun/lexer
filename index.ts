@@ -2,7 +2,7 @@
 
 import { styleText, type InspectOptions } from 'node:util';
 import { inspect, inspectOptions } from './src/utils/InspectOptions';
-import { Char } from './src/char/Char';
+import { Char, CharArray } from './src/char/Char';
 import { Lexer } from './src/lexer/Lexer';
 import { Parser } from './src/parser/Parser';
 import { ParseError } from './src/parser/ParseError';
@@ -11,26 +11,27 @@ import { BoxText, BoxType } from './src/logger/logger';
 
 type Results = { chars?: Char[]; lexer?: Lexer; parser?: Parser; };
 
+const LAST_TEST = 15;
 const SPACER = ( n: number = 1 ) => '\u0020'.repeat( n );
 
 const config = {
     // OPTIONAL: SET THE LAST TEST NUMBER TO EXECUTE
-    lastTest: 15,
+    lastTest: LAST_TEST,
 
     // CUSTOM INSPECT BREAKLENGTH
     options: { ...inspectOptions, breakLength: 80 } as InspectOptions,
 
     // OPTIONAL FORMATTING FLAGS:
-    display: { EOF: true, pos: false, span: false, msg: true },
+    display: { EOF: true, pos: true, span: true, msg: true },
 
     // CHARS
-    chars: { get: true, log: false },
+    chars: { get: true, log: true },
 
     // LEXER/TOKENS
-    tokens: { get: true, log: false },
+    tokens: { get: false, log: false },
 
     // PARSER/CST
-    cst: { get: true, log: true },
+    cst: { get: false, log: false },
 } as const;
 
 const tests: Map<number, string> = new Map<number, string>( [
@@ -169,7 +170,7 @@ const runTest = ( testStr: string ): Results => {
     const results: Results = {};
 
     if ( !config.chars.get ) throw new Error( 'Character processing disabled' );
-    results.chars = Char.fromString( testStr );
+    results.chars = CharArray.fromString( testStr );
 
     if ( config.tokens.get ) results.lexer = new Lexer( results.chars, testStr );
 
